@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import theme from './theme/theme';
+import { screen } from '@testing-library/react';
+import { render } from './test/test-utils';
 import App from './App';
 
 // Mock localStorage
@@ -24,7 +22,7 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 // Mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -32,14 +30,8 @@ vi.mock('react-router-dom', async () => {
 });
 
 describe('App Component', () => {
-  const renderWithRouter = (initialRoute = '/') => {
-    return render(
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
-      </MemoryRouter>
-    );
+  const renderApp = (initialRoute = '/') => {
+    return render(<App />, { initialRoute });
   };
 
   const loginAsAdmin = () => {
@@ -60,48 +52,48 @@ describe('App Component', () => {
 
   describe('Authentication Flow', () => {
     it('redirects to login page when accessing protected route without auth', () => {
-      renderWithRouter('/');
+      renderApp('/');
       expect(screen.getByText(/dental plan login/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     });
 
     it('allows access to home page when authenticated', () => {
       loginAsAdmin();
-      renderWithRouter('/');
+      renderApp('/');
       expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /find/i })).toBeInTheDocument();
     });
 
     it('redirects to login page when accessing invalid route without auth', () => {
-      renderWithRouter('/invalid-route');
+      renderApp('/invalid-route');
       expect(screen.getByText(/dental plan login/i)).toBeInTheDocument();
     });
   });
 
   describe('Login Page', () => {
     it('shows test account information', () => {
-      renderWithRouter('/login');
+      renderApp('/login');
       expect(screen.getByText(/available test accounts/i)).toBeInTheDocument();
       expect(screen.getByText(/admin \/.*admin123/i)).toBeInTheDocument();
       expect(screen.getByText(/dentist \/.*dentist123/i)).toBeInTheDocument();
     });
 
     it('shows required form fields', () => {
-      renderWithRouter('/login');
+      renderApp('/login');
       expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^password \*/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     });
 
     it('stays on login page when already on it', () => {
-      renderWithRouter('/login');
+      renderApp('/login');
       expect(screen.getByText(/dental plan login/i)).toBeInTheDocument();
     });
   });
 
   describe('Error Pages', () => {
     it('shows unauthorized page on direct access', () => {
-      renderWithRouter('/unauthorized');
+      renderApp('/unauthorized');
       expect(screen.getByText(/access denied/i)).toBeInTheDocument();
       expect(
         screen.getByText(/you don't have permission to access this page/i)
@@ -111,7 +103,7 @@ describe('App Component', () => {
 
     it('redirects authenticated user to home on invalid route', () => {
       loginAsAdmin();
-      renderWithRouter('/invalid-route');
+      renderApp('/invalid-route');
       expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
     });
   });
