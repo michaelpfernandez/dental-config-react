@@ -87,12 +87,14 @@ describe('App Component', () => {
     });
 
     it('shows required form fields', () => {
+      renderWithRouter('/login');
       expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^password \*/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     });
 
     it('stays on login page when already on it', () => {
+      renderWithRouter('/login');
       expect(screen.getByText(/dental plan login/i)).toBeInTheDocument();
     });
   });
