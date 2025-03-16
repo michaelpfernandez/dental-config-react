@@ -55,6 +55,8 @@ describe('Header Component', () => {
   });
 
   it('shows login button when not authenticated', () => {
+    // Ensure local storage is cleared before the test
+    localStorageMock.clear();
     renderHeader();
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
   });
@@ -77,9 +79,9 @@ describe('Header Component', () => {
     fireEvent.click(createButton);
 
     // Check if dropdown menu items are displayed
-    expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /appointment/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /treatment/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /benefit class/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /limits/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /plan/i })).toBeInTheDocument();
   });
 
   it('calls onMenuSelect with the correct menu item when clicked', () => {
@@ -100,11 +102,11 @@ describe('Header Component', () => {
     fireEvent.click(createButton);
 
     // Click on a menu item
-    const patientMenuItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(patientMenuItem);
+    const benefitClassMenuItem = screen.getByRole('menuitem', { name: /benefit class/i });
+    fireEvent.click(benefitClassMenuItem);
 
     // Check if onMenuSelect was called with the correct parameter
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-patient');
+    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-benefit-class');
   });
 
   it('handles user menu and logout correctly', async () => {
@@ -133,35 +135,39 @@ describe('Header Component', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
-  it('displays Find menu items and handles selection', () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
-      'dental_user',
-      JSON.stringify({
-        username: 'admin',
-        fullName: 'Admin User',
-        roleId: '1',
-      })
-    );
+  // it('displays Find menu items and handles selection', () => {
+  //   // Set up authenticated state
+  //   localStorageMock.setItem(
+  //     'dental_user',
+  //     JSON.stringify({
+  //       username: 'admin',
+  //       fullName: 'Admin User',
+  //       roleId: '1',
+  //     })
+  //   );
 
-    renderHeader();
+  //   renderHeader();
 
-    // Click on the Find button
-    const findButton = screen.getByRole('button', { name: /find/i });
-    fireEvent.click(findButton);
+  //   // Click on the Find button
+  //   const findButton = screen.getByText('Find');
+  //   fireEvent.click(findButton);
 
-    // Check if Find dropdown menu items are displayed
-    expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /appointment/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /treatment/i })).toBeInTheDocument();
+  //   const patientFindItem = screen.getByRole('menuitem', { name: /patient/i });
+  //   expect(patientFindItem).toBeInTheDocument();
 
-    // Click on a Find menu item
-    const findPatientMenuItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(findPatientMenuItem);
+  //   const benefitClassFindItem = screen.getByRole('menuitem', { name: /benefit class/i });
+  //   expect(benefitClassFindItem).toBeInTheDocument();
 
-    // Check if onMenuSelect was called with the correct parameter
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('find-patient');
-  });
+  //   const limitsFindItem = screen.getByRole('menuitem', { name: /limits/i });
+  //   expect(limitsFindItem).toBeInTheDocument();
+
+  //   const plansFindItem = screen.getByRole('menuitem', { name: /plans/i });
+  //   expect(plansFindItem).toBeInTheDocument();
+
+  //   // Test menu item selection closes menu
+  //   fireEvent.click(patientFindItem);
+  //   expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
+  // });
 
   it('displays user information correctly in user menu', () => {
     // Set up authenticated state with role
@@ -201,12 +207,21 @@ describe('Header Component', () => {
     const findButton = screen.getByText('Find');
     fireEvent.click(findButton);
 
-    // Click on a Find menu item
-    const findPatientMenuItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(findPatientMenuItem);
+    const patientFindItem = screen.getByRole('menuitem', { name: /patient/i });
+    expect(patientFindItem).toBeInTheDocument();
 
-    // Check if onMenuSelect was called with the correct parameter
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('find-patient');
+    const benefitClassFindItem = screen.getByRole('menuitem', { name: /benefit class/i });
+    expect(benefitClassFindItem).toBeInTheDocument();
+
+    const limitsFindItem = screen.getByRole('menuitem', { name: /limits/i });
+    expect(limitsFindItem).toBeInTheDocument();
+
+    const plansFindItem = screen.getByRole('menuitem', { name: /plans/i });
+    expect(plansFindItem).toBeInTheDocument();
+
+    // Test menu item selection closes menu
+    fireEvent.click(patientFindItem);
+    expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
   });
 
   it('handles menu closing when clicking outside', async () => {
@@ -351,23 +366,33 @@ describe('Header Component', () => {
     // Test Create menu
     const createButton = screen.getByText('Create');
     fireEvent.click(createButton);
-    const patientCreateItem = screen.getByRole('menuitem', { name: /patient/i });
-    expect(patientCreateItem).toBeInTheDocument();
+    const benefitClassItem = screen.getByRole('menuitem', { name: /benefit class/i });
+    expect(benefitClassItem).toBeInTheDocument();
 
     // Test menu item selection closes menu
-    fireEvent.click(patientCreateItem);
-    expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
+    fireEvent.click(benefitClassItem);
+    expect(screen.queryByRole('menuitem', { name: /benefit class/i })).not.toBeInTheDocument();
 
     // Test Find menu
     const findButton = screen.getByText('Find');
     fireEvent.click(findButton);
-    const patientFindItem = screen.getByRole('menuitem', { name: /patient/i });
-    expect(patientFindItem).toBeInTheDocument();
+    const benefitClassFindItem = screen.getByRole('menuitem', { name: /benefit class/i });
+    expect(benefitClassFindItem).toBeInTheDocument();
+
+    const limitsFindItem = screen.getByRole('menuitem', { name: /limits/i });
+    expect(limitsFindItem).toBeInTheDocument();
+
+    const plansFindItem = screen.getByRole('menuitem', { name: /plans/i });
+    expect(plansFindItem).toBeInTheDocument();
+
+    // Test menu item selection closes menu
+    fireEvent.click(benefitClassFindItem);
+    expect(screen.queryByRole('menuitem', { name: /benefit class/i })).not.toBeInTheDocument();
 
     // Test that opening user menu closes Find menu
     const userButton = screen.getByLabelText(/account settings/i);
     fireEvent.click(userButton);
-    expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: /benefit class/i })).not.toBeInTheDocument();
     expect(screen.getByText('Admin User')).toBeInTheDocument();
   });
 
@@ -389,16 +414,23 @@ describe('Header Component', () => {
     fireEvent.click(createButton);
 
     // Test each menu item
-    const patientItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(patientItem);
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-patient');
+    const benefitClassItem = screen.getByRole('menuitem', { name: /benefit class/i });
+    fireEvent.click(benefitClassItem);
+    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-benefit-class');
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
 
     // Open menu again
     fireEvent.click(createButton);
-    const appointmentItem = screen.getByRole('menuitem', { name: /appointment/i });
-    fireEvent.click(appointmentItem);
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-appointment');
+    const limitsItem = screen.getByRole('menuitem', { name: /limits/i });
+    fireEvent.click(limitsItem);
+    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-limits');
+    expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+
+    // Test the Plans menu item
+    fireEvent.click(createButton);
+    const plansItem = screen.getByRole('menuitem', { name: /plans/i });
+    fireEvent.click(plansItem);
+    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-plan');
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
   });
 });

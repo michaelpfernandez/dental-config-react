@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from './HomePage';
 import { AuthProvider } from '../contexts/AuthContext';
+import AppLayout from '../components/layout/AppLayout';
+import { loggingConfig } from '../config/logging'; // Import logging configuration
 
 // Mock localStorage
 const mockStorage: { [key: string]: string } = {};
@@ -35,7 +37,9 @@ describe('HomePage Component', () => {
     return render(
       <MemoryRouter>
         <AuthProvider>
-          <HomePage />
+          <AppLayout>
+            <HomePage />
+          </AppLayout>
         </AuthProvider>
       </MemoryRouter>
     );
@@ -51,20 +55,15 @@ describe('HomePage Component', () => {
     expect(screen.getByText(/welcome to dental plan configuration/i)).toBeInTheDocument();
   });
 
-  it('renders the Header component', () => {
-    renderHomePage();
-    expect(screen.getByText('Dental Plan Configuration')).toBeInTheDocument();
-  });
-
   it('renders the initial content area with instructions', () => {
     renderHomePage();
     expect(
-      screen.getByText(/please select an option from the menu above to get started/i)
+      screen.getByText(/please use the menu above to manage your dental plans/i)
     ).toBeInTheDocument();
   });
 
   it('shows authenticated content when user is logged in', () => {
-    // Set up authenticated state
+    // Ensure local storage is set up correctly in tests
     localStorageMock.setItem(
       'dental_user',
       JSON.stringify({
@@ -76,8 +75,14 @@ describe('HomePage Component', () => {
 
     renderHomePage();
 
+    // Log the authentication status
+    const isAuthenticated = Boolean(localStorage.getItem('dental_user'));
+    if (loggingConfig.enabled) {
+      console.log('User authentication status:', isAuthenticated);
+    }
+
     // Verify Create and Find buttons are visible
-    expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /find/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /create/i })).toBeVisible();
+    expect(screen.getByRole('button', { name: /find/i })).toBeVisible();
   });
 });

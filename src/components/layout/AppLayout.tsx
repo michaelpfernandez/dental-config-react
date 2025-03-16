@@ -4,7 +4,11 @@ import { Box, Container } from '@mui/material';
 import Header from './Header';
 import { MENU_ITEMS } from '../../constants/menuItems';
 
-const AppLayout: React.FC = () => {
+interface AppLayoutProps {
+  children?: React.ReactNode;
+}
+
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
 
   return (
@@ -36,7 +40,7 @@ const AppLayout: React.FC = () => {
         }}
       />
       <Container component="main" sx={{ flex: 1 }}>
-        <Outlet />
+        {children || <Outlet />}
       </Container>
     </Box>
   );

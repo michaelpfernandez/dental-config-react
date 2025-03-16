@@ -123,7 +123,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuSelect }) => {
                   sx: { mt: 1.5 },
                 }}
               >
-                {/* Add find menu items here when needed */}
+                <MenuItem onClick={() => handleMenuItemClick(MENU_ITEMS.FIND_BENEFIT_CLASS)}>
+                  Benefit Class
+                </MenuItem>
+                <MenuItem onClick={() => handleMenuItemClick(MENU_ITEMS.FIND_LIMITS)}>
+                  Limits
+                </MenuItem>
+                <MenuItem onClick={() => handleMenuItemClick(MENU_ITEMS.FIND_PLAN)}>Plans</MenuItem>
               </Menu>
             </Box>
           )}

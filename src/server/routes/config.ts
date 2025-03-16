@@ -10,8 +10,8 @@ const router = express.Router();
 // Get benefit classes configuration
 router.get(
   '/benefitClasses',
-  hasRole(['admin', 'dentist']),
-  hasActionRight(['view']),
+  hasRole(['Administrator']),
+  hasActionRight(['read_all']),
   async (req: AuthRequest, res: Response) => {
     try {
       res.json(benefitClasses);
@@ -25,8 +25,8 @@ router.get(
 // Get benefits configuration
 router.get(
   '/benefits',
-  hasRole(['admin', 'dentist']),
-  hasActionRight(['view']),
+  hasRole(['Administrator']),
+  hasActionRight(['read_all']),
   async (req: AuthRequest, res: Response) => {
     try {
       res.json(benefits);
@@ -40,8 +40,8 @@ router.get(
 // Get plan attributes configuration
 router.get(
   '/planAttributes',
-  hasRole(['admin', 'dentist']),
-  hasActionRight(['view']),
+  hasRole(['Administrator']),
+  hasActionRight(['read_all']),
   async (req: AuthRequest, res: Response) => {
     try {
       res.json(planAttributes);

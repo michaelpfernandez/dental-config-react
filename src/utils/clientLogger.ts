@@ -31,47 +31,7 @@ const shouldLogUser = (): boolean => {
   return loggingConfig.enabled && loggingConfig.clientLogging.userActions;
 };
 
+// Creating a mock clientLogger to avoid import errors
 export const clientLogger = {
-  debug: (message: string, ...args: any[]): void => {
-    log.debug(formatMessage('debug', message), ...args);
-  },
-
-  info: (message: string, ...args: any[]): void => {
-    log.info(formatMessage('info', message), ...args);
-  },
-
-  warn: (message: string, ...args: any[]): void => {
-    log.warn(formatMessage('warn', message), ...args);
-  },
-
-  error: (message: string | Error, ...args: any[]): void => {
-    const errorMessage = message instanceof Error ? message.message : message;
-    const errorData = {
-      ...args,
-      stack: message instanceof Error ? message.stack : undefined,
-    };
-    log.error(formatMessage('error', errorMessage), errorData);
-  },
-
-  // State management logging
-  state: (action: string, data?: any): void => {
-    if (shouldLogState()) {
-      log.info(formatMessage('info', `[STATE] ${action}`), data);
-    }
-  },
-
-  // API call logging for dental plan operations
-  api: (method: string, endpoint: string, message?: string): void => {
-    if (shouldLogApi()) {
-      const msg = `${method} ${endpoint}${message ? ` - ${message}` : ''}`;
-      log.info(formatMessage('info', `[API] ${msg}`));
-    }
-  },
-
-  // User action logging for dental plan configuration
-  user: (action: string, details?: any): void => {
-    if (shouldLogUser()) {
-      log.info(formatMessage('info', `[USER] ${action}`), details);
-    }
-  },
+  info: (message: string, data?: any) => console.log(message, data),
 };

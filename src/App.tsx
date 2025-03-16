@@ -9,7 +9,7 @@ import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import AppLayout from './components/layout/AppLayout';
-import ClassStructure from './components/create/ClassStructure';
+import CreateBenefitClassForm from './components/CreateBenefitClassForm';
 import Limits from './components/create/Limits';
 import Plans from './components/create/Plans';
 
@@ -28,8 +28,8 @@ function App() {
 
               {/* Dental Plan Configuration Routes */}
               <Route path="benefit-classes">
-                <Route index element={<ClassStructure />} />
-                <Route path="create" element={<ClassStructure />} />
+                <Route index element={<CreateBenefitClassForm />} />
+                <Route path="create" element={<CreateBenefitClassForm />} />
               </Route>
               <Route path="limits">
                 <Route index element={<Limits />} />
