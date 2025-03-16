@@ -1,24 +1,41 @@
 import React from 'react';
-import { Outlet, Link as RouterLink } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, Container, Button } from '@mui/material';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { Box, Container } from '@mui/material';
+import Header from './Header';
+import { MENU_ITEMS } from '../../constants/menuItems';
 
 const AppLayout: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Dental Plan Config
-          </Typography>
-          <Button color="inherit" component={RouterLink} to="/create/class-structure">
-            Create
-          </Button>
-          <Button color="inherit" component={RouterLink} to="/">
-            View Plans
-          </Button>
-        </Toolbar>
-      </AppBar>
-      <Container component="main" sx={{ mt: 4, mb: 4, flex: 1 }}>
+      <Header
+        onMenuSelect={(menuItem) => {
+          switch (menuItem) {
+            case MENU_ITEMS.CREATE_BENEFIT_CLASS:
+              navigate('/benefit-classes/create');
+              break;
+            case MENU_ITEMS.CREATE_LIMITS:
+              navigate('/limits/create');
+              break;
+            case MENU_ITEMS.CREATE_PLAN:
+              navigate('/plans/create');
+              break;
+            case MENU_ITEMS.FIND_BENEFIT_CLASS:
+              navigate('/benefit-classes');
+              break;
+            case MENU_ITEMS.FIND_LIMITS:
+              navigate('/limits');
+              break;
+            case MENU_ITEMS.FIND_PLAN:
+              navigate('/plans');
+              break;
+            default:
+              break;
+          }
+        }}
+      />
+      <Container component="main" sx={{ flex: 1 }}>
         <Outlet />
       </Container>
     </Box>

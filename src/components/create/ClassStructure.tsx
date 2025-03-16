@@ -37,7 +37,7 @@ const ClassStructure: React.FC = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ pt: 3 }}>
       <Typography variant="h5" gutterBottom>
         Class Structure
       </Typography>

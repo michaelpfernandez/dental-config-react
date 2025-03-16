@@ -48,7 +48,7 @@ const Plans: React.FC = () => {
     };
 
   return (
-    <Box>
+    <Box sx={{ pt: 3 }}>
       <Typography variant="h5" gutterBottom>
         Plan Configuration
       </Typography>

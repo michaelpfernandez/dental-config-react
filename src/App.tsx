@@ -9,7 +9,6 @@ import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import AppLayout from './components/layout/AppLayout';
-import CreateMenu from './components/create/CreateMenu';
 import ClassStructure from './components/create/ClassStructure';
 import Limits from './components/create/Limits';
 import Plans from './components/create/Plans';
@@ -24,12 +23,21 @@ function App() {
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
+              {/* Home */}
               <Route path="/" element={<HomePage />} />
-              <Route path="create" element={<CreateMenu />}>
-                <Route path="" element={<Navigate to="class-structure" replace />} />
-                <Route path="class-structure" element={<ClassStructure />} />
-                <Route path="limits" element={<Limits />} />
-                <Route path="plans" element={<Plans />} />
+
+              {/* Dental Plan Configuration Routes */}
+              <Route path="benefit-classes">
+                <Route index element={<ClassStructure />} />
+                <Route path="create" element={<ClassStructure />} />
+              </Route>
+              <Route path="limits">
+                <Route index element={<Limits />} />
+                <Route path="create" element={<Limits />} />
+              </Route>
+              <Route path="plans">
+                <Route index element={<Plans />} />
+                <Route path="create" element={<Plans />} />
               </Route>
             </Route>
           </Route>
