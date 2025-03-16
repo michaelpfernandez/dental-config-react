@@ -36,17 +36,26 @@ jobs:
     - name: Run tests with coverage
       run: npm run test:coverage
       
+    - name: Check coverage directory
+      run: ls -la coverage
+      
     - name: Archive code coverage results
       uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report
         path: coverage/
+        if-no-files-found: error
     
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v5
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: >
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
+          -Dsonar.verbose=true
     
     - name: Build project
       run: npm run build
