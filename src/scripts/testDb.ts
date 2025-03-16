@@ -6,11 +6,12 @@ import {
   ProductType,
   CoverageType,
 } from '../models/DentalPlan';
+import { serverLogger } from '../utils/serverLogger';
 
 async function testConnection() {
   try {
     await connectToDatabase();
-    console.log('Successfully connected to MongoDB Atlas!');
+    serverLogger.info('Successfully connected to MongoDB Atlas!');
 
     // Create a sample dental plan with admin user context
     const testPlan = new DentalPlan({
@@ -74,15 +75,16 @@ async function testConnection() {
     });
 
     await testPlan.save();
-    console.log('Successfully created test dental plan!');
-    console.log('Plan ID:', testPlan._id);
+    serverLogger.info('Successfully created test dental plan!', { planId: testPlan._id });
 
     // Retrieve the plan to verify
     const retrievedPlan = await DentalPlan.findById(testPlan._id);
-    console.log('Retrieved plan:', JSON.stringify(retrievedPlan?.header, null, 2));
-    console.log('Plan permissions:', JSON.stringify(retrievedPlan?.permissions, null, 2));
+    serverLogger.info('Retrieved plan details:', {
+      header: retrievedPlan?.header,
+      permissions: retrievedPlan?.permissions,
+    });
   } catch (error) {
-    console.error('Database test failed:', error);
+    serverLogger.error('Database test failed:', error);
   } finally {
     process.exit();
   }

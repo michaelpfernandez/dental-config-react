@@ -8,6 +8,11 @@ import LoginPage from './pages/LoginPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
+import AppLayout from './components/layout/AppLayout';
+import CreateMenu from './components/create/CreateMenu';
+import ClassStructure from './components/create/ClassStructure';
+import Limits from './components/create/Limits';
+import Plans from './components/create/Plans';
 
 function App() {
   return (
@@ -18,7 +23,15 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<HomePage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="create" element={<CreateMenu />}>
+                <Route path="" element={<Navigate to="class-structure" replace />} />
+                <Route path="class-structure" element={<ClassStructure />} />
+                <Route path="limits" element={<Limits />} />
+                <Route path="plans" element={<Plans />} />
+              </Route>
+            </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
