@@ -23,9 +23,10 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 // Mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  const mockedModule = { ...actual } as typeof import('react-router-dom');
   return {
-    ...actual,
+    ...mockedModule,
     useNavigate: () => mockNavigate,
   };
 });
@@ -228,9 +229,9 @@ describe('Header Component', () => {
     // Verify menu items are displayed
     expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
 
-    // Click outside to close menu
-    const backdrop = screen.getByRole('presentation');
-    fireEvent.click(backdrop);
+    // Click outside by triggering Escape key
+    const menu = screen.getByRole('menu');
+    fireEvent.keyDown(menu, { key: 'Escape', code: 'Escape' });
 
     // Verify menu is closed
     expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
