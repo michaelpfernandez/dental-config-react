@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
 import { AuthState, LoginCredentials } from '../types/auth';
 import authData from '../data/auth.json';
 
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return defaultAuthState;
   });
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
+  const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
@@ -118,25 +118,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }));
       return false;
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('dental_user');
     setAuthState(defaultAuthState);
-  };
+  }, []);
 
-  const hasActionRight = (actionRightId: string): boolean => {
-    if (!authState.isAuthenticated || !authState.userRole) {
-      return false;
-    }
+  const hasActionRight = useCallback(
+    (actionRightId: string): boolean => {
+      if (!authState.isAuthenticated || !authState.userRole) {
+        return false;
+      }
 
-    // Check if user has the specific action right
-    return (
-      authState.userActionRights.some((right) => right.id === actionRightId) ||
-      // Or if user has the 'all' version of this right
-      authState.userActionRights.some((right) => right.id === `${actionRightId.split('_')[0]}_all`)
-    );
-  };
+      // Check if user has the specific action right
+      return (
+        authState.userActionRights.some((right) => right.id === actionRightId) ||
+        // Or if user has the 'all' version of this right
+        authState.userActionRights.some(
+          (right) => right.id === `${actionRightId.split('_')[0]}_all`
+        )
+      );
+    },
+    [authState]
+  );
 
   const contextValue = useMemo(
     () => ({
