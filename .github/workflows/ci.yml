@@ -36,6 +36,12 @@ jobs:
     
     - name: Run tests with coverage
       run: npm run test:coverage
+      
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-coverage-report
+        path: coverage/
     
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master

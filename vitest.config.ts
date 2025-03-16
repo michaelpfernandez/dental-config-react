@@ -20,8 +20,20 @@ export default defineConfig({
     setupFiles: ['./src/setupTests.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'src/setupTests.ts'],
+      reporter: ['text', 'json', 'html', 'lcov'],
+      exclude: [
+        'node_modules/',
+        'src/setupTests.ts',
+        'coverage/**',
+        'dist/**',
+        '**/*.d.ts',
+        'test/**',
+        'test{,-*}.{js,cjs,mjs,ts,tsx,jsx}',
+        '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress}.config.*',
+      ],
+      reportsDirectory: './coverage',
+      all: true,
+      clean: true,
     },
   },
 });
