@@ -1,0 +1,20 @@
+{
+  "preventive": {
+    "id": "preventive",
+    "name": "Preventive",
+    "description": "Preventive and diagnostic services",
+    "defaultCostShare": 0
+  },
+  "basic": {
+    "id": "basic",
+    "name": "Basic",
+    "description": "Basic restorative services",
+    "defaultCostShare": 20
+  },
+  "major": {
+    "id": "major",
+    "name": "Major",
+    "description": "Major restorative services",
+    "defaultCostShare": 50
+  }
+}

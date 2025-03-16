@@ -1,0 +1,22 @@
+{
+  "marketSegment": {
+    "options": ["Small", "Individual", "Large"],
+    "default": "Small"
+  },
+  "productType": {
+    "options": ["PPO", "DHMO"],
+    "default": "PPO"
+  },
+  "coverageType": {
+    "options": ["Adult", "Pediatric", "Both"],
+    "default": "Both"
+  },
+  "innTiers": {
+    "options": [1, 2, 3],
+    "default": 1
+  },
+  "oonCoverage": {
+    "options": [true, false],
+    "default": true
+  }
+}
