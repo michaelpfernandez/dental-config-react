@@ -75,14 +75,11 @@ describe('HomePage Component', () => {
 
     renderHomePage();
 
-    // Log the authentication status
+    // Removed console statement for cleaner output
     const isAuthenticated = Boolean(localStorage.getItem('dental_user'));
-    if (loggingConfig.enabled) {
-      console.log('User authentication status:', isAuthenticated);
-    }
-
-    // Verify Create and Find buttons are visible
-    expect(screen.getByRole('button', { name: /create/i })).toBeVisible();
-    expect(screen.getByRole('button', { name: /find/i })).toBeVisible();
   });
+
+  // Verify Create and Find buttons are visible
+  expect(screen.getByRole('button', { name: /create/i })).toBeVisible();
+  expect(screen.getByRole('button', { name: /find/i })).toBeVisible();
 });
