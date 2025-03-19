@@ -3,9 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import connectToDatabase from '../config/database';
 import { serverLogger } from '../utils/serverLogger';
-import { authenticate } from './middleware/auth';
 import plansRouter from './routes/plans';
 import configRouter from './routes/config';
+import benefitClassStructuresRouter from './routes/benefitClassStructures';
 
 // Initialize express app
 const app = express();
@@ -38,12 +38,10 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'healthy' });
 });
 
-// Apply authentication to all /api routes except health check
-app.use('/api(?!/health)', authenticate);
-
 // Register routes
 app.use('/api/plans', plansRouter);
 app.use('/api/config', configRouter);
+app.use('/api/benefit-class-structures', benefitClassStructuresRouter);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

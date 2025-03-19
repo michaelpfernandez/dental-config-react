@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import HomePage from './HomePage';
 import { AuthProvider } from '../contexts/AuthContext';
 import AppLayout from '../components/layout/AppLayout';
-import { loggingConfig } from '../config/logging'; // Import logging configuration
 
 // Mock localStorage
 const mockStorage: { [key: string]: string } = {};
@@ -75,11 +74,8 @@ describe('HomePage Component', () => {
 
     renderHomePage();
 
-    // Removed console statement for cleaner output
-    const isAuthenticated = Boolean(localStorage.getItem('dental_user'));
+    // Verify Create and Find buttons are visible
+    expect(screen.getByRole('button', { name: /create/i })).toBeVisible();
+    expect(screen.getByRole('button', { name: /find/i })).toBeVisible();
   });
-
-  // Verify Create and Find buttons are visible
-  expect(screen.getByRole('button', { name: /create/i })).toBeVisible();
-  expect(screen.getByRole('button', { name: /find/i })).toBeVisible();
 });

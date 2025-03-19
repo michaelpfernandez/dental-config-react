@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import {
   Box,
@@ -42,8 +42,36 @@ const CreateBenefitClassForm: React.FC = () => {
     }));
   };
 
+  const navigate = useNavigate();
   const handleCreateBenefitClass = () => {
-    // Add logic to create benefit class here
+    try {
+      // Validate form
+      if (!attributes.className || !attributes.marketSegment || !attributes.productType) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // Create initial benefit class structure
+      const initialClasses = Array.from({ length: attributes.numberOfClasses }, (_, index) => ({
+        id: `class${index + 1}`,
+        name: '', // Will be populated later if needed
+        benefits: [],
+      }));
+
+      const benefitClassData = {
+        className: attributes.className,
+        effectiveDate: attributes.effectiveDate,
+        marketSegment: attributes.marketSegment,
+        productType: attributes.productType,
+        numberOfClasses: attributes.numberOfClasses,
+        classes: initialClasses,
+      };
+
+      // Navigate to summary page with the form data
+      navigate('/benefit-classes/summary', { state: { benefitClassData } });
+    } catch (err) {
+      alert('An error occurred while processing your request');
+    }
   };
 
   return (
@@ -161,8 +189,22 @@ const CreateBenefitClassForm: React.FC = () => {
                     <strong style={{ color: 'blue' }}>{attributes.effectiveDate}</strong>.
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                    <Button variant="contained" color="primary" onClick={handleCreateBenefitClass}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      sx={{ mt: 2 }}
+                      onClick={handleCreateBenefitClass}
+                    >
                       Create Benefit Class Structure
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/benefit-class-structures"
+                      variant="contained"
+                      sx={{ mt: 2, ml: 2 }}
+                    >
+                      Cancel
                     </Button>
                   </Box>
                 </CardContent>

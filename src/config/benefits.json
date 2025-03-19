@@ -1,43 +1,23 @@
-{
-  "preventive": [
-    {
-      "code": "D1110",
-      "name": "Prophylaxis - Adult",
-      "classId": "preventive"
-    },
-    {
-      "code": "D0120",
-      "name": "Periodic Oral Evaluation",
-      "classId": "preventive"
-    },
-    {
-      "code": "D0274",
-      "name": "Bitewings - Four Films",
-      "classId": "preventive"
-    }
-  ],
-  "basic": [
-    {
-      "code": "D2140",
-      "name": "Amalgam - One Surface",
-      "classId": "basic"
-    },
-    {
-      "code": "D2330",
-      "name": "Resin - One Surface, Anterior",
-      "classId": "basic"
-    }
-  ],
-  "major": [
-    {
-      "code": "D2740",
-      "name": "Crown - Porcelain/Ceramic",
-      "classId": "major"
-    },
-    {
-      "code": "D3330",
-      "name": "Root Canal - Molar",
-      "classId": "major"
-    }
-  ]
-}
+[
+  {
+    "name": "Prophylaxis - Adult"
+  },
+  {
+    "name": "Periodic Oral Evaluation"
+  },
+  {
+    "name": "Bitewings - Four Films"
+  },
+  {
+    "name": "Amalgam - One Surface"
+  },
+  {
+    "name": "Resin - One Surface, Anterior"
+  },
+  {
+    "name": "Crown - Porcelain/Ceramic"
+  },
+  {
+    "name": "Root Canal - Molar"
+  }
+]

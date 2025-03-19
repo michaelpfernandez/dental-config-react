@@ -1,8 +1,6 @@
 import * as log from 'loglevel';
 import { loggingConfig } from '../config/logging';
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-
 // Initialize logger with production settings
 log.setLevel(process.env.NODE_ENV === 'production' ? log.levels.WARN : log.levels.DEBUG);
 
@@ -13,5 +11,5 @@ if (!loggingConfig.enabled) {
 
 // Creating a mock clientLogger to avoid import errors
 export const clientLogger = {
-  info: (message: string, data?: any) => console.log(message, data),
+  info: (message: string, data?: any) => {},
 };
