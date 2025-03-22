@@ -24,6 +24,8 @@ router.get('/benefitClasses', async (req, res: Response) => {
 // Get benefits configuration
 router.get('/benefits', async (req, res: Response) => {
   try {
+    // Log the contents of benefits.json
+    console.log('Benefits Data:', benefits);
     res.json(benefits);
   } catch (error) {
     serverLogger.error('Get benefits error:', error);

@@ -66,8 +66,19 @@ export const benefitClassApi = createApi({
       invalidatesTags: [{ type: 'BenefitClassStructure', id: 'LIST' }],
     }),
 
+    getBenefitClasses: builder.query<BenefitClassStructure[], void>({
+      query: () => '/config/benefit-classes',
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ _id }) => ({ type: 'BenefitClassStructure' as const, id: _id })),
+              { type: 'BenefitClassStructure', id: 'LIST' },
+            ]
+          : [{ type: 'BenefitClassStructure', id: 'LIST' }],
+    }),
+
     getAvailableBenefits: builder.query<any, void>({
-      query: () => '/config/benefits',
+      query: () => '/api/config/benefits',
     }),
   }),
 });
@@ -78,5 +89,6 @@ export const {
   useCreateBenefitClassStructureMutation,
   useUpdateBenefitClassStructureMutation,
   useDeleteBenefitClassStructureMutation,
+  useGetBenefitClassesQuery,
   useGetAvailableBenefitsQuery,
 } = benefitClassApi;

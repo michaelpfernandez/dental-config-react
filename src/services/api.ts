@@ -66,4 +66,16 @@ export const del = async <T>(url: string, config?: AxiosRequestConfig): Promise<
   return response.data;
 };
 
+// Function to fetch benefit classes
+export const fetchBenefitClasses = async () => {
+  const response = await api.get('/config/benefit-classes');
+  return response.data;
+};
+
+// Function to fetch benefits list
+export const fetchBenefitsList = async () => {
+  const response = await api.get('/config/benefits');
+  return response.data;
+};
+
 export default api;

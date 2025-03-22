@@ -1,23 +1,32 @@
-[
-  {
-    "name": "Prophylaxis - Adult"
-  },
-  {
-    "name": "Periodic Oral Evaluation"
-  },
-  {
-    "name": "Bitewings - Four Films"
-  },
-  {
-    "name": "Amalgam - One Surface"
-  },
-  {
-    "name": "Resin - One Surface, Anterior"
-  },
-  {
-    "name": "Crown - Porcelain/Ceramic"
-  },
-  {
-    "name": "Root Canal - Molar"
-  }
-]
+{
+  "benefits": [
+    {
+      "id": 1,
+      "name": "Prophylaxis - Adult"
+    },
+    {
+      "id": 2,
+      "name": "Periodic Oral Evaluation"
+    },
+    {
+      "id": 3,
+      "name": "Bitewings - Four Films"
+    },
+    {
+      "id": 4,
+      "name": "Amalgam - One Surface"
+    },
+    {
+      "id": 5,
+      "name": "Resin - One Surface, Anterior"
+    },
+    {
+      "id": 6,
+      "name": "Crown - Porcelain/Ceramic"
+    },
+    {
+      "id": 7,
+      "name": "Root Canal - Molar"
+    }
+  ]
+}

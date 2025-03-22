@@ -51,26 +51,18 @@ const CreateBenefitClassForm: React.FC = () => {
         return;
       }
 
-      // Create initial benefit class structure
-      const initialClasses = Array.from({ length: attributes.numberOfClasses }, (_, index) => ({
-        id: `class${index + 1}`,
-        name: '', // Will be populated later if needed
-        benefits: [],
-      }));
-
-      const benefitClassData = {
-        className: attributes.className,
-        effectiveDate: attributes.effectiveDate,
-        marketSegment: attributes.marketSegment,
-        productType: attributes.productType,
-        numberOfClasses: attributes.numberOfClasses,
-        classes: initialClasses,
-      };
-
       // Navigate to summary page with the form data
-      navigate('/benefit-classes/summary', { state: { benefitClassData } });
-    } catch (err) {
-      alert('An error occurred while processing your request');
+      navigate('/benefit-classes/summary', {
+        state: {
+          effectiveDate: attributes.effectiveDate,
+          className: attributes.className,
+          marketSegment: attributes.marketSegment,
+          productType: attributes.productType,
+          numberOfClasses: attributes.numberOfClasses,
+        },
+      });
+    } catch (error) {
+      console.error('Error creating benefit class:', error);
     }
   };
 
