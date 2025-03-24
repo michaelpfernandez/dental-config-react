@@ -9,7 +9,7 @@ import {
   Typography,
   MenuItem,
 } from '@mui/material';
-import { Edit as EditIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
 
 export interface PlanSummary {
   effectiveDate: string;
@@ -117,12 +117,12 @@ const EditableSummaryCard: React.FC<EditableSummaryCardProps> = ({
           <Button variant="outlined" onClick={() => setIsEditing(true)} startIcon={<EditIcon />} />
         ) : (
           <>
-            <Button variant="contained" onClick={handleSave} startIcon={<EditIcon />}>
-              Save
-            </Button>
-            <Button variant="outlined" onClick={() => setIsEditing(false)} startIcon={<EditIcon />}>
-              Cancel
-            </Button>
+            <Button variant="contained" onClick={handleSave} startIcon={<SaveIcon />} />
+            <Button
+              variant="outlined"
+              onClick={() => setIsEditing(false)}
+              startIcon={<CancelIcon />}
+            />
           </>
         )}
       </CardActions>
