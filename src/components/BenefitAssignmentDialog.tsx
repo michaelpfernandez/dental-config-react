@@ -190,8 +190,8 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary" startIcon={<CancelIcon />} />
         <Button onClick={handleSave} color="primary" startIcon={<SaveIcon />} />
+        <Button onClick={onClose} color="primary" startIcon={<CancelIcon />} />
       </DialogActions>
     </Dialog>
   );
