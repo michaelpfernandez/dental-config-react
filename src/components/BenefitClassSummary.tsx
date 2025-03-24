@@ -48,7 +48,7 @@ const BenefitClassSummary: React.FC<{ availableClasses: BenefitClass[] }> = ({
         numberOfClasses={formData.numberOfClasses || 1}
       />
       <BenefitClassTable
-        numberOfClasses={formData.numberOfClasses || 1}
+        numberOfClasses={planSummary.numberOfClasses}
         availableClasses={availableClasses}
         onClassSelect={handleClassSelect}
       />

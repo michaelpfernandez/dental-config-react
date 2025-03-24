@@ -101,6 +101,22 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({ numberOfClasses }
     loadBenefitClasses();
   }, []);
 
+  useEffect(() => {
+    // Create new states based on number of classes
+    const newClassBenefits = new Map<number, string[]>();
+
+    // Preserve existing benefits for classes that still exist
+    for (let i = 0; i < numberOfClasses; i++) {
+      if (classBenefits.has(i)) {
+        newClassBenefits.set(i, classBenefits.get(i)!);
+      } else {
+        newClassBenefits.set(i, []);
+      }
+    }
+
+    setClassBenefits(newClassBenefits);
+  }, [numberOfClasses, classBenefits]);
+
   return (
     <div>
       <TableContainer>
