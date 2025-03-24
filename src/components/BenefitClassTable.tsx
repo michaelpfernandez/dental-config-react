@@ -12,6 +12,7 @@ import {
   MenuItem,
   Button,
 } from '@mui/material';
+import { Edit as EditIcon } from '@mui/icons-material';
 import { fetchBenefitClasses, fetchBenefitsList } from '../services/api';
 import { clientLogger } from '../utils/clientLogger';
 import BenefitAssignmentDialog from './BenefitAssignmentDialog';
@@ -154,7 +155,7 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({ numberOfClasses }
                           onClick={() => handleEdit(availableClasses[index]!.id, index)}
                           style={{ marginLeft: '8px' }}
                         >
-                          Edit
+                          <EditIcon />
                         </Button>
                       )}
                     </div>
