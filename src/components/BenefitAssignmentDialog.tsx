@@ -9,7 +9,7 @@ import {
   Paper,
   IconButton,
 } from '@mui/material';
-import { Clear as ClearIcon } from '@mui/icons-material';
+import { Clear as ClearIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
 
 interface Benefit {
   id: string;
@@ -190,12 +190,8 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={handleSave} color="primary">
-          Save
-        </Button>
+        <Button onClick={onClose} color="primary" startIcon={<CancelIcon />} />
+        <Button onClick={handleSave} color="primary" startIcon={<SaveIcon />} />
       </DialogActions>
     </Dialog>
   );
