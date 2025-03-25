@@ -1,19 +1,20 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Grid,
+  Card,
+  CardContent,
   FormControl,
   InputLabel,
-  Button,
   Input,
   Select,
   MenuItem,
+  Button,
+  Link,
 } from '@mui/material';
+import { clientLogger } from 'utils/clientLogger';
 
 interface PlanAttributes {
   effectiveDate: string;
@@ -62,7 +63,7 @@ const CreateBenefitClassForm: React.FC = () => {
         },
       });
     } catch (error) {
-      console.error('Error creating benefit class:', error);
+      clientLogger.error('Error creating benefit class:', error);
     }
   };
 

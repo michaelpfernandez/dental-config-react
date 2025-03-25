@@ -1,15 +1,15 @@
-import React, { useState, useRef, KeyboardEvent } from 'react';
+import React, { KeyboardEvent, useRef, useState } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Paper,
+  DialogTitle,
   IconButton,
+  Paper,
+  TextField,
+  DialogActions,
 } from '@mui/material';
-import { Clear as ClearIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import { ClearIcon } from './common/icons';
+import { ConfirmationButtons } from './common/ConfirmationButtons';
 
 interface Benefit {
   id: string;
@@ -82,9 +82,10 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
     return text.replace(regex, '<mark>$1</mark>');
   };
 
-  const handleSave = () => {
+  const handleDone = () => {
     onBenefitSelect(selectedBenefits);
     onSave();
+    onClose();
   };
 
   return (
@@ -190,8 +191,7 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleSave} color="primary" startIcon={<SaveIcon />} />
-        <Button onClick={onClose} color="primary" startIcon={<CancelIcon />} />
+        <ConfirmationButtons onDone={handleDone} onCancel={onClose} />
       </DialogActions>
     </Dialog>
   );

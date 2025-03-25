@@ -12,7 +12,7 @@ import {
   MenuItem,
   Button,
 } from '@mui/material';
-import { Edit as EditIcon } from '@mui/icons-material';
+import { EditIcon } from './common/icons';
 import { fetchBenefitClasses, fetchBenefitsList } from '../services/api';
 import { clientLogger } from '../utils/clientLogger';
 import BenefitAssignmentDialog from './BenefitAssignmentDialog';
@@ -142,7 +142,6 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({ numberOfClasses }
                         label="Select Benefit Class"
                         defaultValue=""
                         onChange={(e) => {
-                          const classId = e.target.value;
                           setClassBenefits((prev) => {
                             const newMap = new Map(prev);
                             newMap.set(index, [...benefitsForClass]);

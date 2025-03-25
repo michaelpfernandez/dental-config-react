@@ -9,7 +9,8 @@ import {
   Typography,
   MenuItem,
 } from '@mui/material';
-import { Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import { EditIcon } from './common/icons';
+import { ConfirmationButtons } from './common/ConfirmationButtons';
 
 export interface PlanSummary {
   effectiveDate: string;
@@ -44,7 +45,7 @@ const EditableSummaryCard: React.FC<EditableSummaryCardProps> = ({
       }));
     };
 
-  const handleSave = () => {
+  const handleDone = () => {
     onSave(data);
     setIsEditing(false);
   };
@@ -113,17 +114,12 @@ const EditableSummaryCard: React.FC<EditableSummaryCardProps> = ({
         </Grid>
       </CardContent>
       <CardActions>
-        {!isEditing ? (
-          <Button variant="outlined" onClick={() => setIsEditing(true)} startIcon={<EditIcon />} />
+        {isEditing ? (
+          <ConfirmationButtons onDone={handleDone} onCancel={() => setIsEditing(false)} />
         ) : (
-          <>
-            <Button variant="contained" onClick={handleSave} startIcon={<SaveIcon />} />
-            <Button
-              variant="outlined"
-              onClick={() => setIsEditing(false)}
-              startIcon={<CancelIcon />}
-            />
-          </>
+          <Button variant="outlined" onClick={() => setIsEditing(true)} startIcon={<EditIcon />}>
+            Edit
+          </Button>
         )}
       </CardActions>
     </Card>

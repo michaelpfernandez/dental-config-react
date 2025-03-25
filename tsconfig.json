@@ -15,7 +15,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "utils/*": ["utils/*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./src/utils"]
   },
-  "include": ["src"]
+  "include": ["src/**/*", "vitest.config.ts", "src/utils/*.d.ts"]
 }
