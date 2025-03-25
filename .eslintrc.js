@@ -36,9 +36,6 @@ module.exports = {
 
     // Disable strict rule for external files
     strict: 'off',
-
-    // Disable trailing comma rules
-    'comma-dangle': ['off'],
   },
   settings: {
     react: {
