@@ -1,15 +1,16 @@
-import React, { KeyboardEvent, useRef, useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Dialog,
-  DialogContent,
   DialogTitle,
-  IconButton,
-  Paper,
-  TextField,
+  DialogContent,
   DialogActions,
+  TextField,
+  Paper,
+  IconButton,
 } from '@mui/material';
-import { ClearIcon } from './common/icons';
-import { ConfirmationButtons } from './common/ConfirmationButtons';
+import { ClearIcon } from '../common/icons';
+import { fetchBenefitsList } from '../../services/api';
+import { ConfirmationButtons } from '../common/ConfirmationButtons';
 
 interface Benefit {
   id: string;

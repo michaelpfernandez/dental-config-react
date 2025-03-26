@@ -9,8 +9,8 @@ import {
   Typography,
   MenuItem,
 } from '@mui/material';
-import { EditIcon } from './common/icons';
-import { ConfirmationButtons } from './common/ConfirmationButtons';
+import { EditIcon } from '../common/icons';
+import { ConfirmationButtons } from '../common/ConfirmationButtons';
 
 export interface PlanSummary {
   effectiveDate: string;

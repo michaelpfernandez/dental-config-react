@@ -9,8 +9,8 @@ import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import AppLayout from './components/layout/AppLayout';
-import CreateBenefitClassForm from './components/CreateBenefitClassForm';
-import BenefitClassSummary from './components/BenefitClassSummary';
+import CreateBenefitClassForm from './components/benefit-classes/forms/CreateBenefitClassForm';
+import BenefitClassSummary from './components/benefit-classes/summary/BenefitClassSummary';
 import Limits from './components/create/Limits';
 import Plans from './components/create/Plans';
 

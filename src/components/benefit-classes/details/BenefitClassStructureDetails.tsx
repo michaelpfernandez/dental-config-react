@@ -14,9 +14,9 @@ import { FaArrowLeft } from 'react-icons/fa';
 import {
   useGetBenefitClassStructureByIdQuery,
   useDeleteBenefitClassStructureMutation,
-} from '../store/apis/benefitClassApi';
-import { useAppDispatch } from '../hooks/useAppDispatch';
-import { setLocalStructure, setSelectedStructure } from '../store/slices/benefitClassSlice';
+} from '../../store/apis/benefitClassApi';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { setLocalStructure, setSelectedStructure } from '../../store/slices/benefitClassSlice';
 
 const BenefitClassStructureDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();

@@ -15,9 +15,9 @@ import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import {
   useGetBenefitClassStructuresQuery,
   useDeleteBenefitClassStructureMutation,
-} from '../store/apis/benefitClassApi';
-import { useAppDispatch } from '../hooks/useAppDispatch';
-import { setSelectedStructure } from '../store/slices/benefitClassSlice';
+} from '../../store/apis/benefitClassApi';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { setSelectedStructure } from '../../store/slices/benefitClassSlice';
 
 const BenefitClassStructureList: React.FC = () => {
   const { data: structures, isLoading, error, refetch } = useGetBenefitClassStructuresQuery();

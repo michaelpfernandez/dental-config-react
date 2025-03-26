@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Typography, Container } from '@mui/material';
-import EditableSummaryCard, { PlanSummary } from './EditableSummaryCard';
-import BenefitClassTable, { BenefitClass } from './BenefitClassTable';
+import EditableSummaryCard, { PlanSummary } from '../card/EditableSummaryCard';
+import BenefitClassTable, { BenefitClass } from '../table/BenefitClassTable';
 
 const BenefitClassSummary: React.FC<{ availableClasses: BenefitClass[] }> = ({
   availableClasses,

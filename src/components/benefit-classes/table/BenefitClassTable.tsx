@@ -12,10 +12,10 @@ import {
   MenuItem,
   Button,
 } from '@mui/material';
-import { EditIcon } from './common/icons';
-import { fetchBenefitClasses, fetchBenefitsList } from '../services/api';
-import { clientLogger } from '../utils/clientLogger';
-import BenefitAssignmentDialog from './BenefitAssignmentDialog';
+import { EditIcon } from '../common/icons';
+import { fetchBenefitClasses, fetchBenefitsList } from '../../../services/api';
+import { clientLogger } from '../../../utils/clientLogger';
+import BenefitAssignmentDialog from '../dialogs/BenefitAssignmentDialog';
 
 export interface BenefitClass {
   id: string;

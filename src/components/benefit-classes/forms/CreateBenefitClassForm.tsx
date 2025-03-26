@@ -14,7 +14,7 @@ import {
   Button,
   Link,
 } from '@mui/material';
-import { clientLogger } from 'utils/clientLogger';
+import { clientLogger } from '../../../utils/clientLogger';
 
 interface PlanAttributes {
   effectiveDate: string;
