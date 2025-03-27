@@ -5,26 +5,26 @@ import { EditIcon, ClearIcon, CheckIcon, CancelIcon, SaveIcon } from '../icons';
 describe('Material-UI Icons', () => {
   it('renders EditIcon', () => {
     render(<EditIcon />);
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    expect(screen.getByTestId('EditIcon')).toBeInTheDocument();
   });
 
   it('renders ClearIcon', () => {
     render(<ClearIcon />);
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    expect(screen.getByTestId('ClearIcon')).toBeInTheDocument();
   });
 
   it('renders CheckIcon', () => {
     render(<CheckIcon />);
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    expect(screen.getByTestId('CheckIcon')).toBeInTheDocument();
   });
 
   it('renders CancelIcon', () => {
     render(<CancelIcon />);
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    expect(screen.getByTestId('CancelIcon')).toBeInTheDocument();
   });
 
   it('renders SaveIcon', () => {
     render(<SaveIcon />);
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    expect(screen.getByTestId('SaveIcon')).toBeInTheDocument();
   });
 });

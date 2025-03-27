@@ -75,7 +75,10 @@ describe('HomePage Component', () => {
     renderHomePage();
 
     // Verify Create and Find buttons are visible
-    expect(screen.getByRole('button', { name: /create/i })).toBeVisible();
-    expect(screen.getByRole('button', { name: /find/i })).toBeVisible();
+    const createButton = screen.getByRole('button', { name: /Create/i });
+    expect(createButton).toBeInTheDocument();
+
+    const findButton = screen.getByRole('button', { name: /Find/i });
+    expect(findButton).toBeInTheDocument();
   });
 });

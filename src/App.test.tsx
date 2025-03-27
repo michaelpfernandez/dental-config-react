@@ -34,7 +34,7 @@ describe('App Component', () => {
     return render(<App />, { initialRoute });
   };
 
-  const loginAsAdmin = () => {
+  const loginAsAdmin = async () => {
     localStorageMock.setItem(
       'dental_user',
       JSON.stringify({
@@ -43,6 +43,8 @@ describe('App Component', () => {
         roleId: '1',
       })
     );
+    // Wait for auth state to update
+    await new Promise((resolve) => setTimeout(resolve, 600));
   };
 
   beforeEach(() => {
@@ -51,60 +53,59 @@ describe('App Component', () => {
   });
 
   describe('Authentication Flow', () => {
-    it('redirects to login page when accessing protected route without auth', () => {
+    it('redirects to login page when accessing protected route without auth', async () => {
       renderApp('/');
-      expect(screen.getByText(/dental plan login/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+      expect(await screen.findByText(/dental plan login/i)).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: /sign in/i })).toBeInTheDocument();
     });
 
-    it('allows access to home page when authenticated', () => {
-      loginAsAdmin();
-      renderApp('/');
-      expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /find/i })).toBeInTheDocument();
-    });
-
-    it('redirects to login page when accessing invalid route without auth', () => {
+    it('redirects to login page when accessing invalid route without auth', async () => {
       renderApp('/invalid-route');
-      expect(screen.getByText(/dental plan login/i)).toBeInTheDocument();
+      expect(await screen.findByText(/dental plan login/i)).toBeInTheDocument();
+    });
+
+    it('allows access to home page when authenticated', async () => {
+      await loginAsAdmin();
+      renderApp('/');
+      expect(await screen.findByText(/welcome to dental plan configuration/i)).toBeInTheDocument();
     });
   });
 
   describe('Login Page', () => {
-    it('shows test account information', () => {
+    it('shows test account information', async () => {
       renderApp('/login');
-      expect(screen.getByText(/available test accounts/i)).toBeInTheDocument();
-      expect(screen.getByText(/admin \/.*admin123/i)).toBeInTheDocument();
-      expect(screen.getByText(/dentist \/.*dentist123/i)).toBeInTheDocument();
+      expect(await screen.findByText(/available test accounts/i)).toBeInTheDocument();
+      expect(await screen.findByText(/admin.*admin123/i)).toBeInTheDocument();
+      expect(await screen.findByText(/dentist.*dentist123/i)).toBeInTheDocument();
     });
 
-    it('shows required form fields', () => {
+    it('shows required form fields', async () => {
       renderApp('/login');
-      expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/^password \*/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+      expect(await screen.findByLabelText(/username/i)).toBeInTheDocument();
+      expect(await screen.findByLabelText(/^password \*/i)).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: /sign in/i })).toBeInTheDocument();
     });
 
-    it('stays on login page when already on it', () => {
+    it('stays on login page when already on it', async () => {
       renderApp('/login');
-      expect(screen.getByText(/dental plan login/i)).toBeInTheDocument();
+      expect(await screen.findByText(/dental plan login/i)).toBeInTheDocument();
     });
   });
 
   describe('Error Pages', () => {
-    it('shows unauthorized page on direct access', () => {
+    it('shows unauthorized page on direct access', async () => {
       renderApp('/unauthorized');
-      expect(screen.getByText(/access denied/i)).toBeInTheDocument();
+      expect(await screen.findByText(/access denied/i)).toBeInTheDocument();
       expect(
-        screen.getByText(/you don't have permission to access this page/i)
+        await screen.findByText(/you don't have permission to access this page/i)
       ).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /return to home/i })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: /return to home/i })).toBeInTheDocument();
     });
 
-    it('redirects authenticated user to home on invalid route', () => {
-      loginAsAdmin();
+    it('redirects authenticated user to home on invalid route', async () => {
+      await loginAsAdmin();
       renderApp('/invalid-route');
-      expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
+      expect(await screen.findByText(/welcome to dental plan configuration/i)).toBeInTheDocument();
     });
   });
 });

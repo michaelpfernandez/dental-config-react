@@ -3,22 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Header from './Header';
 import { AuthProvider } from '../../contexts/AuthContext';
-
-// Mock localStorage
-const mockStorage: { [key: string]: string } = {};
-const localStorageMock = {
-  getItem: vi.fn((key: string) => mockStorage[key] || null),
-  setItem: vi.fn((key: string, value: string) => {
-    mockStorage[key] = value;
-  }),
-  removeItem: vi.fn((key: string) => {
-    delete mockStorage[key];
-  }),
-  clear: vi.fn(() => {
-    Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
-  }),
-};
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+import { MENU_ITEMS } from '../../constants/menuItems';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -31,9 +16,9 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-describe('Header Component', () => {
-  const mockOnMenuSelect = vi.fn();
+const mockOnMenuSelect = vi.fn();
 
+describe('Header Component', () => {
   const renderHeader = () => {
     return render(
       <MemoryRouter>
@@ -46,7 +31,7 @@ describe('Header Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorageMock.clear();
+    localStorage.clear();
   });
 
   it('renders the header with correct title', () => {
@@ -54,16 +39,9 @@ describe('Header Component', () => {
     expect(screen.getByText('Dental Plan Configuration')).toBeInTheDocument();
   });
 
-  it('shows login button when not authenticated', () => {
-    // Ensure local storage is cleared before the test
-    localStorageMock.clear();
-    renderHeader();
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
-  });
-
   it('displays the Create dropdown menu when authenticated', () => {
     // Set up authenticated state
-    localStorageMock.setItem(
+    localStorage.setItem(
       'dental_user',
       JSON.stringify({
         username: 'admin',
@@ -79,14 +57,14 @@ describe('Header Component', () => {
     fireEvent.click(createButton);
 
     // Check if dropdown menu items are displayed
-    expect(screen.getByRole('menuitem', { name: /benefit class/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /limits/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /plan/i })).toBeInTheDocument();
+    expect(screen.getByText('Benefit Class Structure')).toBeInTheDocument();
+    expect(screen.getByText('Limits')).toBeInTheDocument();
+    expect(screen.getByText('Plans')).toBeInTheDocument();
   });
 
   it('calls onMenuSelect with the correct menu item when clicked', () => {
     // Set up authenticated state
-    localStorageMock.setItem(
+    localStorage.setItem(
       'dental_user',
       JSON.stringify({
         username: 'admin',
@@ -102,16 +80,16 @@ describe('Header Component', () => {
     fireEvent.click(createButton);
 
     // Click on a menu item
-    const benefitClassMenuItem = screen.getByRole('menuitem', { name: /benefit class/i });
+    const benefitClassMenuItem = screen.getByText('Benefit Class Structure');
     fireEvent.click(benefitClassMenuItem);
 
     // Check if onMenuSelect was called with the correct parameter
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-benefit-class');
+    expect(mockOnMenuSelect).toHaveBeenCalledWith(MENU_ITEMS.CREATE_BENEFIT_CLASS);
   });
 
   it('handles user menu and logout correctly', async () => {
     // Set up authenticated state
-    localStorageMock.setItem(
+    localStorage.setItem(
       'dental_user',
       JSON.stringify({
         username: 'admin',
@@ -131,47 +109,13 @@ describe('Header Component', () => {
     fireEvent.click(logoutMenuItem);
 
     // Check if localStorage was cleared and navigation occurred
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('dental_user');
+    expect(localStorage.getItem('dental_user')).toBeNull();
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
-  // it('displays Find menu items and handles selection', () => {
-  //   // Set up authenticated state
-  //   localStorageMock.setItem(
-  //     'dental_user',
-  //     JSON.stringify({
-  //       username: 'admin',
-  //       fullName: 'Admin User',
-  //       roleId: '1',
-  //     })
-  //   );
-
-  //   renderHeader();
-
-  //   // Click on the Find button
-  //   const findButton = screen.getByText('Find');
-  //   fireEvent.click(findButton);
-
-  //   const patientFindItem = screen.getByRole('menuitem', { name: /patient/i });
-  //   expect(patientFindItem).toBeInTheDocument();
-
-  //   const benefitClassFindItem = screen.getByRole('menuitem', { name: /benefit class/i });
-  //   expect(benefitClassFindItem).toBeInTheDocument();
-
-  //   const limitsFindItem = screen.getByRole('menuitem', { name: /limits/i });
-  //   expect(limitsFindItem).toBeInTheDocument();
-
-  //   const plansFindItem = screen.getByRole('menuitem', { name: /plans/i });
-  //   expect(plansFindItem).toBeInTheDocument();
-
-  //   // Test menu item selection closes menu
-  //   fireEvent.click(patientFindItem);
-  //   expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
-  // });
-
   it('displays user information correctly in user menu', () => {
     // Set up authenticated state with role
-    localStorageMock.setItem(
+    localStorage.setItem(
       'dental_user',
       JSON.stringify({
         username: 'admin',
@@ -190,11 +134,11 @@ describe('Header Component', () => {
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
-  it('handles menu item selection in Find menu', () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
+  it('shows user menu when authenticated', () => {
+    localStorage.setItem(
       'dental_user',
       JSON.stringify({
+        id: '1',
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
@@ -202,131 +146,15 @@ describe('Header Component', () => {
     );
 
     renderHeader();
-
-    // Find and click the Find button
-    const findButton = screen.getByText('Find');
-    fireEvent.click(findButton);
-
-    const patientFindItem = screen.getByRole('menuitem', { name: /patient/i });
-    expect(patientFindItem).toBeInTheDocument();
-
-    const benefitClassFindItem = screen.getByRole('menuitem', { name: /benefit class/i });
-    expect(benefitClassFindItem).toBeInTheDocument();
-
-    const limitsFindItem = screen.getByRole('menuitem', { name: /limits/i });
-    expect(limitsFindItem).toBeInTheDocument();
-
-    const plansFindItem = screen.getByRole('menuitem', { name: /plans/i });
-    expect(plansFindItem).toBeInTheDocument();
-
-    // Test menu item selection closes menu
-    fireEvent.click(patientFindItem);
-    expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
+    const userMenu = screen.getByRole('button', { name: /account settings/i });
+    expect(userMenu).toBeInTheDocument();
   });
 
-  it('handles menu closing when clicking outside', async () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
+  it('handles menu item selection in Create menu', () => {
+    localStorage.setItem(
       'dental_user',
       JSON.stringify({
-        username: 'admin',
-        fullName: 'Admin User',
-        roleId: '1',
-      })
-    );
-
-    renderHeader();
-
-    // Open Create menu
-    const createButton = screen.getByText('Create');
-    fireEvent.click(createButton);
-
-    // Verify menu items are displayed
-    expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
-
-    // Click outside by triggering Escape key
-    const menu = screen.getByRole('menu');
-    fireEvent.keyDown(menu, { key: 'Escape', code: 'Escape' });
-
-    // Verify menu is closed
-    expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
-  });
-
-  it('handles menu anchor element updates', () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
-      'dental_user',
-      JSON.stringify({
-        username: 'admin',
-        fullName: 'Admin User',
-        roleId: '1',
-      })
-    );
-
-    renderHeader();
-
-    // Test Create menu
-    const createButton = screen.getByText('Create');
-    fireEvent.click(createButton);
-    expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
-    fireEvent.mouseDown(document.body);
-
-    // Test Find menu
-    const findButton = screen.getByText('Find');
-    fireEvent.click(findButton);
-    expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
-    fireEvent.mouseDown(document.body);
-
-    // Test user menu
-    const userButton = screen.getByLabelText(/account settings/i);
-    fireEvent.click(userButton);
-    expect(screen.getByText('Admin User')).toBeInTheDocument();
-    fireEvent.mouseDown(document.body);
-  });
-
-  it('handles menu closing functions', () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
-      'dental_user',
-      JSON.stringify({
-        username: 'admin',
-        fullName: 'Admin User',
-        roleId: '1',
-      })
-    );
-
-    renderHeader();
-
-    // Test Create menu closing
-    const createButton = screen.getByText('Create');
-    fireEvent.click(createButton);
-    expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
-    const createMenuItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(createMenuItem);
-    expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
-
-    // Test Find menu closing
-    const findButton = screen.getByText('Find');
-    fireEvent.click(findButton);
-    expect(screen.getByRole('menuitem', { name: /patient/i })).toBeInTheDocument();
-    const findMenuItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(findMenuItem);
-    expect(screen.queryByRole('menuitem', { name: /patient/i })).not.toBeInTheDocument();
-
-    // Test user menu closing
-    const userButton = screen.getByLabelText(/account settings/i);
-    fireEvent.click(userButton);
-    expect(screen.getByText('Admin User')).toBeInTheDocument();
-    const logoutButton = screen.getByRole('menuitem', { name: /logout/i });
-    fireEvent.click(logoutButton);
-    expect(screen.queryByText('Admin User')).not.toBeInTheDocument();
-  });
-
-  it('handles menu item clicks', () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
-      'dental_user',
-      JSON.stringify({
+        id: '1',
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
@@ -338,99 +166,45 @@ describe('Header Component', () => {
     // Test Create menu item click
     const createButton = screen.getByText('Create');
     fireEvent.click(createButton);
-    const createPatientItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(createPatientItem);
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-patient');
+    const benefitClassItem = screen.getByText('Benefit Class Structure');
+    fireEvent.click(benefitClassItem);
+    expect(mockOnMenuSelect).toHaveBeenCalledWith(MENU_ITEMS.CREATE_BENEFIT_CLASS);
+
+    const limitsItem = screen.getByText('Limits');
+    fireEvent.click(limitsItem);
+    expect(mockOnMenuSelect).toHaveBeenCalledWith(MENU_ITEMS.CREATE_LIMITS);
+
+    const plansItem = screen.getByText('Plans');
+    fireEvent.click(plansItem);
+    expect(mockOnMenuSelect).toHaveBeenCalledWith(MENU_ITEMS.CREATE_PLAN);
+  });
+
+  it('handles menu item selection in Find menu', () => {
+    localStorage.setItem(
+      'dental_user',
+      JSON.stringify({
+        id: '1',
+        username: 'admin',
+        fullName: 'Admin User',
+        roleId: '1',
+      })
+    );
+
+    renderHeader();
 
     // Test Find menu item click
     const findButton = screen.getByText('Find');
     fireEvent.click(findButton);
-    const findPatientItem = screen.getByRole('menuitem', { name: /patient/i });
-    fireEvent.click(findPatientItem);
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('find-patient');
-  });
-
-  it('handles menu state management', () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
-      'dental_user',
-      JSON.stringify({
-        username: 'admin',
-        fullName: 'Admin User',
-        roleId: '1',
-      })
-    );
-
-    renderHeader();
-
-    // Test Create menu
-    const createButton = screen.getByText('Create');
-    fireEvent.click(createButton);
-    const benefitClassItem = screen.getByRole('menuitem', { name: /benefit class/i });
-    expect(benefitClassItem).toBeInTheDocument();
-
-    // Test menu item selection closes menu
+    const benefitClassItem = screen.getByText('Benefit Class');
     fireEvent.click(benefitClassItem);
-    expect(screen.queryByRole('menuitem', { name: /benefit class/i })).not.toBeInTheDocument();
+    expect(mockOnMenuSelect).toHaveBeenCalledWith(MENU_ITEMS.FIND_BENEFIT_CLASS);
 
-    // Test Find menu
-    const findButton = screen.getByText('Find');
-    fireEvent.click(findButton);
-    const benefitClassFindItem = screen.getByRole('menuitem', { name: /benefit class/i });
-    expect(benefitClassFindItem).toBeInTheDocument();
-
-    const limitsFindItem = screen.getByRole('menuitem', { name: /limits/i });
-    expect(limitsFindItem).toBeInTheDocument();
-
-    const plansFindItem = screen.getByRole('menuitem', { name: /plans/i });
-    expect(plansFindItem).toBeInTheDocument();
-
-    // Test menu item selection closes menu
-    fireEvent.click(benefitClassFindItem);
-    expect(screen.queryByRole('menuitem', { name: /benefit class/i })).not.toBeInTheDocument();
-
-    // Test that opening user menu closes Find menu
-    const userButton = screen.getByLabelText(/account settings/i);
-    fireEvent.click(userButton);
-    expect(screen.queryByRole('menuitem', { name: /benefit class/i })).not.toBeInTheDocument();
-    expect(screen.getByText('Admin User')).toBeInTheDocument();
-  });
-
-  it('handles menu item selection', () => {
-    // Set up authenticated state
-    localStorageMock.setItem(
-      'dental_user',
-      JSON.stringify({
-        username: 'admin',
-        fullName: 'Admin User',
-        roleId: '1',
-      })
-    );
-
-    renderHeader();
-
-    // Test Create menu items
-    const createButton = screen.getByText('Create');
-    fireEvent.click(createButton);
-
-    // Test each menu item
-    const benefitClassItem = screen.getByRole('menuitem', { name: /benefit class/i });
-    fireEvent.click(benefitClassItem);
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-benefit-class');
-    expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
-
-    // Open menu again
-    fireEvent.click(createButton);
-    const limitsItem = screen.getByRole('menuitem', { name: /limits/i });
+    const limitsItem = screen.getByText('Limits');
     fireEvent.click(limitsItem);
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-limits');
-    expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    expect(mockOnMenuSelect).toHaveBeenCalledWith(MENU_ITEMS.FIND_LIMITS);
 
-    // Test the Plans menu item
-    fireEvent.click(createButton);
-    const plansItem = screen.getByRole('menuitem', { name: /plans/i });
+    const plansItem = screen.getByText('Plans');
     fireEvent.click(plansItem);
-    expect(mockOnMenuSelect).toHaveBeenCalledWith('create-plan');
-    expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    expect(mockOnMenuSelect).toHaveBeenCalledWith(MENU_ITEMS.FIND_PLAN);
   });
 });

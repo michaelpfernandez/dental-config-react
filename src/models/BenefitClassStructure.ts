@@ -67,7 +67,26 @@ const BenefitClassStructureSchema = new Schema(
     lastModifiedAt: { type: Date, required: true },
     permissions: {
       roles: [{ type: String }],
-      actionRights: { type: Map, of: [String] },
+      actionRights: {
+        type: Schema.Types.Mixed,
+        validate: function (this: any) {
+          if (!this.permissions || !this.permissions.actionRights) {
+            return true;
+          }
+
+          const actionRights = this.permissions.actionRights;
+
+          // Check if all values are arrays
+          for (const rights of Object.values(actionRights)) {
+            if (!Array.isArray(rights)) {
+              return false;
+            }
+          }
+
+          return true;
+        },
+        message: 'Invalid permissions structure: actionRights must be an object with array values',
+      },
     },
   },
   {

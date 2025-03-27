@@ -1,8 +1,9 @@
 import React from 'react';
 import { Box, Container, Typography, Paper, Button } from '@mui/material';
+import { useAuth } from '../contexts/AuthContext';
 
 const HomePage: React.FC = () => {
-  const isAuthenticated = Boolean(localStorage.getItem('dental_user'));
+  const { isAuthenticated } = useAuth();
 
   return (
     <Container maxWidth="lg">
