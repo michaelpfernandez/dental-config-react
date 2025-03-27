@@ -17,10 +17,15 @@ const HomePage: React.FC = () => {
           </Typography>
           {isAuthenticated && (
             <Box sx={{ mt: 2 }}>
-              <Button variant="contained" color="primary">
+              <Button variant="contained" color="primary" aria-label="Create new dental plan">
                 Create
               </Button>
-              <Button variant="contained" color="secondary" sx={{ ml: 2 }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                sx={{ ml: 2 }}
+                aria-label="Find existing dental plans"
+              >
                 Find
               </Button>
             </Box>

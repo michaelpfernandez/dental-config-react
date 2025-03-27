@@ -75,10 +75,10 @@ describe('HomePage Component', () => {
     renderHomePage();
 
     // Verify Create and Find buttons are visible
-    const createButton = screen.getByRole('button', { name: /Create/i });
+    const createButton = screen.getByRole('button', { name: /Create new dental plan/i });
     expect(createButton).toBeInTheDocument();
 
-    const findButton = screen.getByRole('button', { name: /Find/i });
+    const findButton = screen.getByRole('button', { name: /Find existing dental plans/i });
     expect(findButton).toBeInTheDocument();
   });
 });
