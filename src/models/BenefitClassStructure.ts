@@ -1,15 +1,19 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { MarketSegment, ProductType } from './DentalPlan';
 
-interface IBenefit {
+export interface IBenefit {
   code: string;
   name: string;
 }
 
-interface IClass {
+export interface IClass {
   id: string;
   name: string;
   benefits: IBenefit[];
+}
+
+export interface IClassConfig {
+  classes: IClass[];
 }
 
 export interface IBenefitClassStructure extends Document {
@@ -19,6 +23,7 @@ export interface IBenefitClassStructure extends Document {
   productType: ProductType;
   numberOfClasses: number;
   classes: IClass[];
+  classConfig?: IClassConfig;
   createdBy: string;
   createdAt: Date;
   lastModifiedBy: string;
@@ -61,6 +66,9 @@ const BenefitClassStructureSchema = new Schema(
       required: true,
     },
     classes: [ClassSchema],
+    classConfig: {
+      classes: [ClassSchema],
+    },
     createdBy: { type: String, required: true },
     createdAt: { type: Date, required: true },
     lastModifiedBy: { type: String, required: true },
@@ -94,9 +102,18 @@ const BenefitClassStructureSchema = new Schema(
   }
 );
 
+// Add pre-save hook to handle classConfig
+BenefitClassStructureSchema.pre('save', function (next) {
+  if (this.classConfig?.classes) {
+    this.classes = this.classConfig.classes;
+  }
+  next();
+});
+
 // Add validation to ensure class names are unique
 BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]) {
-  const classNames = classes.map((c) => c.name);
+  const classesToCheck = this.classConfig?.classes || classes;
+  const classNames = classesToCheck.map((c) => c.name);
   const uniqueClassNames = new Set(classNames);
 
   // Find duplicates
@@ -112,9 +129,10 @@ BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]
 
 // Add validation to ensure benefits are not assigned to multiple classes
 BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]) {
+  const classesToCheck = this.classConfig?.classes || classes;
   const benefitCodes = new Set<string>();
 
-  for (const cls of classes) {
+  for (const cls of classesToCheck) {
     for (const benefit of cls.benefits) {
       if (benefitCodes.has(benefit.code)) {
         return false;

@@ -1,9 +1,4 @@
 import { vi, describe, it, beforeEach, afterEach } from 'vitest';
-import { createTheme } from '@mui/material/styles';
-import { fetchBenefitClasses, fetchBenefitsList } from '../../../services/api';
-
-// Create a theme instance
-const theme = createTheme();
 
 // Mock the API functions
 describe('BenefitClassTable', () => {

@@ -22,7 +22,9 @@ describe('Header Component', () => {
   const renderHeader = () => {
     return render(
       <MemoryRouter>
+        ,
         <AuthProvider>
+          ,
           <Header onMenuSelect={mockOnMenuSelect} />
         </AuthProvider>
       </MemoryRouter>

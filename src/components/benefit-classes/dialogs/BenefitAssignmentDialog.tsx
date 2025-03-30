@@ -9,7 +9,6 @@ import {
   IconButton,
 } from '@mui/material';
 import { ClearIcon } from '../common/icons';
-import { fetchBenefitsList } from '../../services/api';
 import { ConfirmationButtons } from '../common/ConfirmationButtons';
 
 interface Benefit {

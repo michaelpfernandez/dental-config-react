@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { BenefitClassStructure } from '../../models/BenefitClassStructure';
+import { BenefitClassStructure, IClass, IClassConfig } from '../../models/BenefitClassStructure';
 import { serverLogger } from '../../utils/serverLogger';
 
 const router = Router();
@@ -25,6 +25,16 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 // Create new benefit class structure
 router.post('/', async (req: AuthRequest, res: Response) => {
   try {
+    const { classConfig } = (req.body as { classConfig?: any }) || {};
+
+    // Early return if classConfig is undefined
+    if (!classConfig) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'classConfig is required',
+      });
+    }
+
     const structure = new BenefitClassStructure({
       ...req.body,
       createdBy: req.user?.id,
@@ -72,6 +82,16 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 // Update benefit class structure
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
+    const { classConfig } = (req.body as { classConfig?: any }) || {};
+
+    // Early return if classConfig is undefined
+    if (!classConfig) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'classConfig is required',
+      });
+    }
+
     const structure = await BenefitClassStructure.findByIdAndUpdate(
       req.params.id,
       {
@@ -91,6 +111,63 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     serverLogger.error('Update benefit class structure error:', error);
     res.status(400).json({
       error: 'Failed to update benefit class structure',
+      details: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+// Configure benefit class structure
+router.put('/:id/configure', async (req: AuthRequest, res: Response) => {
+  try {
+    const { classConfig } = (req.body as { classConfig?: IClassConfig }) || {};
+
+    // Early return if classConfig is undefined
+    if (!classConfig) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'classConfig is required',
+      });
+    }
+
+    // Validate class configuration
+    const validationErrors: string[] = [];
+    classConfig.classes.forEach((classData: IClass, index: number) => {
+      if (!classData.name) {
+        validationErrors.push(`Class ${index + 1}: Name is required`);
+      }
+      if (!Array.isArray(classData.benefits)) {
+        validationErrors.push(`Class ${index + 1}: Benefits must be an array`);
+      }
+    });
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: validationErrors,
+      });
+    }
+
+    // Update classes
+    const structure = await BenefitClassStructure.findById(req.params.id);
+
+    if (!structure) {
+      return res.status(404).json({ error: 'Benefit class structure not found' });
+    }
+
+    structure.classes = classConfig.classes.map((classData) => ({
+      ...classData,
+      benefits: classData.benefits || [],
+    }));
+
+    structure.lastModifiedBy = req.user?.id || '';
+    structure.lastModifiedAt = new Date();
+
+    await structure.save();
+    res.json(structure);
+  } catch (error) {
+    serverLogger.error('Configure benefit class structure error:', error);
+    res.status(400).json({
+      error: 'Validation failed',
       details: error instanceof Error ? error.message : String(error),
     });
   }
