@@ -26,7 +26,7 @@ describe('BenefitClassStructure Model', () => {
     await BenefitClassStructure.deleteMany({});
 
     // Create test document
-    testDoc = {
+    testDoc = new BenefitClassStructure({
       name: 'Test Structure',
       effectiveDate: new Date(),
       marketSegment: MarketSegment.Large,
@@ -54,7 +54,7 @@ describe('BenefitClassStructure Model', () => {
         roles: ['admin'],
         actionRights: { admin: ['view', 'edit', 'delete'] },
       },
-    };
+    });
   });
 
   describe('Schema Validation', () => {
@@ -121,7 +121,7 @@ describe('BenefitClassStructure Model', () => {
   describe('Permissions System', () => {
     it('should validate permissions structure', async () => {
       const doc = new BenefitClassStructure({
-        ...testDoc,
+        ...testDoc.toObject(),
         permissions: {
           roles: ['admin'],
           actionRights: { admin: ['view', 'edit', 'delete'] },
@@ -132,7 +132,7 @@ describe('BenefitClassStructure Model', () => {
 
     it('should reject invalid permissions structure', async () => {
       const doc = new BenefitClassStructure({
-        ...testDoc,
+        ...testDoc.toObject(),
         permissions: {
           roles: ['admin'],
           actionRights: { admin: 'invalid' }, // Invalid type

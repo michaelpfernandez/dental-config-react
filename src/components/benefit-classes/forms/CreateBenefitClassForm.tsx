@@ -12,7 +12,6 @@ import {
   Select,
   MenuItem,
   Button,
-  Link,
 } from '@mui/material';
 import { clientLogger } from '../../../utils/clientLogger';
 
@@ -192,8 +191,7 @@ const CreateBenefitClassForm: React.FC = () => {
                       Create Benefit Class Structure
                     </Button>
                     <Button
-                      component={Link}
-                      to="/benefit-class-structures"
+                      onClick={() => navigate('/benefit-class-structures')}
                       variant="contained"
                       sx={{ mt: 2, ml: 2 }}
                     >

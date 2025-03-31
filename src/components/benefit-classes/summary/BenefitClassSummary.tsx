@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Typography, Container } from '@mui/material';
 import EditableSummaryCard, { PlanSummary } from '../card/EditableSummaryCard';
-import BenefitClassTable, { BenefitClass } from '../table/BenefitClassTable';
+import BenefitClassTable from '../table/BenefitClassTable';
 
-const BenefitClassSummary: React.FC<{ availableClasses: BenefitClass[] }> = ({
-  availableClasses,
-}) => {
+const BenefitClassSummary: React.FC = () => {
   const location = useLocation();
   const formData = location.state as PlanSummary & { numberOfClasses: number };
 
@@ -30,10 +28,6 @@ const BenefitClassSummary: React.FC<{ availableClasses: BenefitClass[] }> = ({
     // TODO: Save to backend or dispatch to Redux store if needed
   };
 
-  const handleClassSelect = (index: number, classId: string | null) => {
-    // Removed the setSelectedClasses function call
-  };
-
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
@@ -47,11 +41,7 @@ const BenefitClassSummary: React.FC<{ availableClasses: BenefitClass[] }> = ({
         onSave={handleSummaryUpdate}
         numberOfClasses={formData.numberOfClasses || 1}
       />
-      <BenefitClassTable
-        numberOfClasses={planSummary.numberOfClasses}
-        availableClasses={availableClasses}
-        onClassSelect={handleClassSelect}
-      />
+      <BenefitClassTable numberOfClasses={planSummary.numberOfClasses} />
     </Container>
   );
 };
