@@ -11,5 +11,10 @@ if (!loggingConfig.enabled) {
 
 // Creating a mock clientLogger to avoid import errors
 export const clientLogger = {
-  info: (message: string, data?: any) => {},
+  info: (message: string, data?: any) => {
+    log.info(message, data);
+  },
+  error: (message: string, data?: any) => {
+    log.error(message, data);
+  },
 };

@@ -52,7 +52,7 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
     setSelectedSuggestionIndex(-1);
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const filtered = filteredBenefits;
 
     if (e.key === 'ArrowDown' && showSuggestions && filtered.length > 0) {

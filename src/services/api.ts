@@ -1,5 +1,10 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
+interface ApiErrorResponse {
+  message: string;
+  [key: string]: any; // Allow other properties
+}
+
 // Create axios instance
 const api = axios.create({
   baseURL: '/api',
@@ -33,7 +38,7 @@ api.interceptors.response.use(
     }
 
     // Create standardized error format
-    const errorMessage = error.response?.data?.message || error.message;
+    const errorMessage = (error.response?.data as ApiErrorResponse)?.message || error.message;
     return Promise.reject({
       status: error.response?.status,
       message: errorMessage,

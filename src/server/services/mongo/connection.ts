@@ -18,18 +18,6 @@ export class MongoConnection implements IMongoConnection {
 
   private constructor() {}
 
-  public async resetConnection(): Promise<void> {
-    if (this.connected) {
-      try {
-        await mongoose.disconnect();
-      } catch (error) {
-        // Ignore disconnect errors during reset
-      }
-    }
-    this.connection = null;
-    this.connected = false;
-  }
-
   public static async getInstance(): Promise<MongoConnection> {
     if (!MongoConnection.instance) {
       MongoConnection.instance = new MongoConnection();
@@ -77,17 +65,23 @@ export class MongoConnection implements IMongoConnection {
   }
 
   public getConnection(): Connection {
-    if (!this.isConnected()) {
+    if (!this.isConnected() || !this.connection) {
       throw new Error('MongoDB connection is not established');
     }
     return this.connection;
   }
 
   public async resetConnection(): Promise<void> {
-    if (this.connected) {
-      await this.disconnect();
+    try {
+      if (this.connected) {
+        await this.disconnect();
+      }
+      await this.connect();
+    } catch (error) {
+      this.connection = null;
+      this.connected = false;
+      throw error;
     }
-    await this.connect();
   }
 }
 

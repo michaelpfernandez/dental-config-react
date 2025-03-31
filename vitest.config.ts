@@ -30,12 +30,11 @@ export default defineConfig({
       reportsDirectory: './coverage',
       all: true,
       clean: true,
-      thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 80,
-        statements: 80,
-      },
+      lines: 80,
+      functions: 80,
+      branches: 80,
+      statements: 80,
+      // Remove thresholds object as it's not supported
     },
   },
 });

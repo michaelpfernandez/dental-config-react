@@ -14,12 +14,9 @@ describe('MongoConnection', () => {
   afterAll(async () => {
     await teardownMongoConnection();
     // Clear all mongoose models
-    mongoose.deleteModel(/.*/); // This removes all models
-
-    // Reset mongoose connection
-    mongoose.models = {};
-    mongoose.modelSchemas = {};
-    mongoose.connection.models = {};
+    Object.keys(mongoose.models).forEach((modelName) => {
+      mongoose.deleteModel(modelName);
+    });
   });
 
   beforeEach(async () => {
@@ -47,10 +44,10 @@ describe('MongoConnection', () => {
       expect(instance1).toBe(instance2);
     });
 
-    it('should create a new instance if none exists', async () => {
-      // We can't actually test this in tests since we're using a singleton
-      // This test is more about the implementation than the behavior
-      expect(MongoConnection.instance).toBeDefined();
+    it('should maintain singleton instance', async () => {
+      const instance = await MongoConnection.getInstance();
+      expect(instance).toBeInstanceOf(MongoConnection);
+      expect(instance.isConnected()).toBeDefined();
     });
   });
 

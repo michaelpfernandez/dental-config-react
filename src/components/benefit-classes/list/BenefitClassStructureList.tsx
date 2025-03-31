@@ -15,9 +15,9 @@ import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import {
   useGetBenefitClassStructuresQuery,
   useDeleteBenefitClassStructureMutation,
-} from '../../store/apis/benefitClassApi';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { setSelectedStructure } from '../../store/slices/benefitClassSlice';
+} from '../../../store/apis/benefitClassApi';
+import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import { setSelectedStructure } from '../../../store/slices/benefitClassSlice';
 
 const BenefitClassStructureList: React.FC = () => {
   const { data: structures, isLoading, error, refetch } = useGetBenefitClassStructuresQuery();
@@ -51,7 +51,7 @@ const BenefitClassStructureList: React.FC = () => {
     return (
       <Box textAlign="center" py={10}>
         <Typography color="error">Error loading benefit class structures</Typography>
-        <Button mt={4} onClick={() => refetch()}>
+        <Button sx={{ mt: 4 }} onClick={() => refetch()}>
           Try Again
         </Button>
       </Box>

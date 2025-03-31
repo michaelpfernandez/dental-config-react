@@ -10,18 +10,22 @@ import MongoConnection from '../connection';
 dotenv.config({ path: '.env.test' });
 
 class TestMongoServer {
-  private static instance: MongoMemoryServer;
-  private static uri: string;
+  private static instance?: MongoMemoryServer;
+  private static uri?: string;
   private static readonly TEST_PORT = 37017; // Use a non-standard port
   private static readonly DB_PATH = path.join(os.tmpdir(), 'dental-plan-mongo-test');
 
   static async getInstance(): Promise<MongoMemoryServer> {
     if (!TestMongoServer.instance) {
       TestMongoServer.instance = await MongoMemoryServer.create({
+        instance: {
+          port: TestMongoServer.TEST_PORT,
+          dbPath: TestMongoServer.DB_PATH,
+        },
         binary: {
           version: '6.0.12',
-          downloadUrl: 'https://fastdl.mongodb.org/osx/mongodb-macos-arm64-6.0.12.tgz',
-          checkMD5: false,
+          arch: 'arm64',
+          platform: 'darwin',
         },
       });
       TestMongoServer.uri = TestMongoServer.instance.getUri();
@@ -39,13 +43,16 @@ class TestMongoServer {
         if (fs.existsSync(TestMongoServer.DB_PATH)) {
           await fs.promises.rm(TestMongoServer.DB_PATH, { recursive: true, force: true });
         }
-        TestMongoServer.instance = null;
-        TestMongoServer.uri = null;
+        TestMongoServer.instance = undefined;
+        TestMongoServer.uri = undefined;
       }
     }
   }
 
   static getUri(): string {
+    if (!TestMongoServer.uri) {
+      throw new Error('MongoDB URI not initialized');
+    }
     return TestMongoServer.uri;
   }
 }
@@ -68,7 +75,8 @@ export const setupMongoConnection = async () => {
   } catch (error) {
     await TestMongoServer.stopInstance();
     // Preserve the original error message
-    throw new Error(`Failed to setup test MongoDB connection: ${error.message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to setup test MongoDB connection: ${message}`);
   }
 };
 
