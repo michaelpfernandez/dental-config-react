@@ -23,7 +23,6 @@ export default defineConfig({
         'node_modules/',
         'src/setupTests.ts',
         'src/test/**/*',
-        'src/**/*.test.{ts,tsx}',
         'src/index.tsx',
         'src/reportWebVitals.ts',
       ],
