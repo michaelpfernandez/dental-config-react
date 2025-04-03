@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { BenefitClassStructure, IClass, IClassConfig } from '../../models/BenefitClassStructure';
+import { BenefitClassStructure, IClass } from '../../models/BenefitClassStructure';
 import { serverLogger } from '../../utils/serverLogger';
 
 const router = Router();
@@ -9,7 +9,7 @@ const router = Router();
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const structures = await BenefitClassStructure.find({})
-      .select('name effectiveDate marketSegment productType numberOfClasses permissions')
+      .select('name effectiveDate marketSegment productType numberOfClasses')
       .sort('-createdAt');
 
     res.json(structures);
@@ -116,22 +116,22 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Configure benefit class structure
-router.put('/:id/configure', async (req: AuthRequest, res: Response) => {
+// Update benefit class structure
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
-    const { classConfig } = (req.body as { classConfig?: IClassConfig }) || {};
+    const { classes } = req.body;
 
-    // Early return if classConfig is undefined
-    if (!classConfig) {
+    // Early return if classes is undefined
+    if (!classes) {
       return res.status(400).json({
         error: 'Validation failed',
-        details: 'classConfig is required',
+        details: 'classes is required',
       });
     }
 
-    // Validate class configuration
+    // Validate classes
     const validationErrors: string[] = [];
-    classConfig.classes.forEach((classData: IClass, index: number) => {
+    classes.forEach((classData: IClass, index: number) => {
       if (!classData.name) {
         validationErrors.push(`Class ${index + 1}: Name is required`);
       }
@@ -154,7 +154,7 @@ router.put('/:id/configure', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Benefit class structure not found' });
     }
 
-    structure.classes = classConfig.classes.map((classData) => ({
+    structure.classes = classes.map((classData: IClass) => ({
       ...classData,
       benefits: classData.benefits || [],
     }));

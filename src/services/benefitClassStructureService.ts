@@ -14,7 +14,4 @@ export const benefitClassStructureService = {
     put<BenefitClassStructure>(`${BASE_URL}/${id}`, data),
 
   delete: (id: string) => del<void>(`${BASE_URL}/${id}`),
-
-  configure: (id: string, classConfig: any) =>
-    put<BenefitClassStructure>(`${BASE_URL}/${id}/configure`, classConfig),
 };

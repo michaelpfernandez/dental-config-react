@@ -12,10 +12,6 @@ export interface IClass {
   benefits: IBenefit[];
 }
 
-export interface IClassConfig {
-  classes: IClass[];
-}
-
 export interface IBenefitClassStructure extends Document {
   name: string;
   effectiveDate: Date;
@@ -23,15 +19,10 @@ export interface IBenefitClassStructure extends Document {
   productType: ProductType;
   numberOfClasses: number;
   classes: IClass[];
-  classConfig?: IClassConfig;
   createdBy: string;
   createdAt: Date;
   lastModifiedBy: string;
   lastModifiedAt: Date;
-  permissions: {
-    roles: string[];
-    actionRights: Record<string, string[]>;
-  };
 }
 
 const BenefitSchema = new Schema({
@@ -66,58 +57,25 @@ const BenefitClassStructureSchema = new Schema(
       required: true,
     },
     classes: [ClassSchema],
-    classConfig: {
-      classes: [ClassSchema],
-    },
     createdBy: { type: String, required: true },
     createdAt: { type: Date, required: true },
     lastModifiedBy: { type: String, required: true },
     lastModifiedAt: { type: Date, required: true },
-    permissions: {
-      roles: [{ type: String }],
-      actionRights: {
-        type: Schema.Types.Mixed,
-        validate: function (this: any) {
-          if (!this.permissions || !this.permissions.actionRights) {
-            return true;
-          }
-
-          const actionRights = this.permissions.actionRights;
-
-          // Check if all values are arrays
-          for (const rights of Object.values(actionRights)) {
-            if (!Array.isArray(rights)) {
-              return false;
-            }
-          }
-
-          return true;
-        },
-        message: 'Invalid permissions structure: actionRights must be an object with array values',
-      },
-    },
   },
   {
     timestamps: true,
   }
 );
 
-// Add pre-save hook to handle classConfig
-BenefitClassStructureSchema.pre('save', function (next) {
-  if (this.classConfig?.classes) {
-    this.classes = this.classConfig.classes;
-  }
-  next();
-});
-
 // Add validation to ensure class names are unique
 BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]) {
-  const classesToCheck = this.classConfig?.classes || classes;
-  const classNames = classesToCheck.map((c) => c.name);
+  const classNames = classes.map((c: IClass) => c.name);
   const uniqueClassNames = new Set(classNames);
 
   // Find duplicates
-  const duplicates = classNames.filter((name, index) => classNames.indexOf(name) !== index);
+  const duplicates = classNames.filter(
+    (name: string, index: number) => classNames.indexOf(name) !== index
+  );
 
   if (classNames.length !== uniqueClassNames.size) {
     const uniqueDuplicates = [...new Set(duplicates)]; // Get unique duplicates
@@ -129,15 +87,16 @@ BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]
 
 // Add validation to ensure benefits are not assigned to multiple classes
 BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]) {
-  const classesToCheck = this.classConfig?.classes || classes;
-  const benefitCodes = new Set<string>();
+  const benefitCodes = new Map<string, string>();
 
-  for (const cls of classesToCheck) {
+  for (const cls of classes) {
     for (const benefit of cls.benefits) {
       if (benefitCodes.has(benefit.code)) {
-        return false;
+        throw new Error(
+          `Benefit ${benefit.code} is already assigned to class ${benefitCodes.get(benefit.code)}`
+        );
       }
-      benefitCodes.add(benefit.code);
+      benefitCodes.set(benefit.code, cls.name);
     }
   }
 

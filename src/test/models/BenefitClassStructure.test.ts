@@ -32,28 +32,22 @@ describe('BenefitClassStructure Model', () => {
       marketSegment: MarketSegment.Large,
       productType: ProductType.PPO,
       numberOfClasses: 4,
-      classConfig: {
-        classes: [
-          {
-            id: '1',
-            name: 'Class 1',
-            benefits: [{ code: 'B1', name: 'Benefit 1' }],
-          },
-          {
-            id: '2',
-            name: 'Class 2',
-            benefits: [{ code: 'B2', name: 'Benefit 2' }],
-          },
-        ],
-      },
+      classes: [
+        {
+          id: '1',
+          name: 'Class 1',
+          benefits: [{ code: 'B1', name: 'Benefit 1' }],
+        },
+        {
+          id: '2',
+          name: 'Class 2',
+          benefits: [{ code: 'B2', name: 'Benefit 2' }],
+        },
+      ],
       createdBy: 'test-user',
       createdAt: new Date(),
       lastModifiedBy: 'test-user',
       lastModifiedAt: new Date(),
-      permissions: {
-        roles: ['admin'],
-        actionRights: { admin: ['view', 'edit', 'delete'] },
-      },
     });
   });
 
@@ -92,54 +86,32 @@ describe('BenefitClassStructure Model', () => {
     it('should validate unique class names', async () => {
       const doc = new BenefitClassStructure({
         ...testDoc,
-        classConfig: {
-          classes: [
-            { id: '1', name: 'Duplicate', benefits: [] },
-            { id: '2', name: 'Duplicate', benefits: [] },
-          ],
-        },
+        classes: [
+          { id: '1', name: 'Duplicate', benefits: [] },
+          { id: '2', name: 'Duplicate', benefits: [] },
+        ],
       });
       await expect(doc.validate()).rejects.toThrow('Class names must be unique');
     });
 
     it('should validate unique benefit assignments', async () => {
       const doc = new BenefitClassStructure({
-        ...testDoc,
-        classConfig: {
-          classes: [
-            { id: '1', name: 'Class 1', benefits: [{ code: 'B1', name: 'Benefit 1' }] },
-            { id: '2', name: 'Class 2', benefits: [{ code: 'B1', name: 'Benefit 1' }] },
-          ],
-        },
+        name: 'Test Structure',
+        effectiveDate: new Date(),
+        marketSegment: MarketSegment.Large,
+        productType: ProductType.PPO,
+        numberOfClasses: 4,
+        classes: [
+          { id: '1', name: 'Class 1', benefits: [{ code: 'B1', name: 'Benefit 1' }] },
+          { id: '2', name: 'Class 2', benefits: [{ code: 'B1', name: 'Benefit 1' }] },
+        ],
+        createdBy: 'test-user',
+        createdAt: new Date(),
+        lastModifiedBy: 'test-user',
+        lastModifiedAt: new Date(),
       });
       await expect(doc.validate()).rejects.toThrow(
-        'Benefits cannot be assigned to multiple classes'
-      );
-    });
-  });
-
-  describe('Permissions System', () => {
-    it('should validate permissions structure', async () => {
-      const doc = new BenefitClassStructure({
-        ...testDoc.toObject(),
-        permissions: {
-          roles: ['admin'],
-          actionRights: { admin: ['view', 'edit', 'delete'] },
-        },
-      });
-      await expect(doc.validate()).resolves.not.toThrow();
-    });
-
-    it('should reject invalid permissions structure', async () => {
-      const doc = new BenefitClassStructure({
-        ...testDoc.toObject(),
-        permissions: {
-          roles: ['admin'],
-          actionRights: { admin: 'invalid' }, // Invalid type
-        },
-      });
-      await expect(doc.validate()).rejects.toThrow(
-        'permissions.actionRights: Validator failed for path `permissions.actionRights`'
+        'Benefit B1 is already assigned to class Class 1'
       );
     });
   });

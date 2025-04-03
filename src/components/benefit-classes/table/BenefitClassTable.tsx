@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Table,
   TableBody,
@@ -101,21 +101,26 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({ numberOfClasses }
     loadBenefitClasses();
   }, []);
 
+  // Keep track of previous state to preserve benefits when number of classes changes
+  const prevClassBenefits = useRef(classBenefits);
+
   useEffect(() => {
     // Create new states based on number of classes
     const newClassBenefits = new Map<number, string[]>();
 
     // Preserve existing benefits for classes that still exist
     for (let i = 0; i < numberOfClasses; i++) {
-      if (classBenefits.has(i)) {
-        newClassBenefits.set(i, classBenefits.get(i)!);
+      if (prevClassBenefits.current.has(i)) {
+        newClassBenefits.set(i, prevClassBenefits.current.get(i)!);
       } else {
         newClassBenefits.set(i, []);
       }
     }
 
+    // Update both the state and our ref
     setClassBenefits(newClassBenefits);
-  }, [numberOfClasses, classBenefits]);
+    prevClassBenefits.current = newClassBenefits;
+  }, [numberOfClasses]); // Only run when numberOfClasses changes
 
   return (
     <div>
