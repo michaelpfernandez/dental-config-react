@@ -11,6 +11,7 @@ import {
   Select,
   MenuItem,
   Button,
+  Box,
 } from '@mui/material';
 import { EditIcon } from '../common/icons';
 import { fetchBenefitClasses, fetchBenefitsList } from '../../../services/api';
@@ -123,9 +124,21 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({ numberOfClasses }
   }, [numberOfClasses]); // Only run when numberOfClasses changes
 
   return (
-    <div>
-      <TableContainer>
-        <Table>
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer
+        sx={{
+          maxHeight: 'calc(100vh - 200px)', // Fixed height calculation based on viewport minus headers
+          overflow: 'auto',
+          '& .MuiTableHead-root': {
+            position: 'sticky',
+            top: 0,
+            backgroundColor: 'background.paper',
+            zIndex: 10,
+            borderBottom: '2px solid rgba(224, 224, 224, 1)',
+          },
+        }}
+      >
+        <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
@@ -196,7 +209,7 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({ numberOfClasses }
         onSave={handleSave}
         rowIndex={selectedRow || 0}
       />
-    </div>
+    </Box>
   );
 };
 
