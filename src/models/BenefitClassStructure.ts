@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { MarketSegment, ProductType } from './DentalPlan';
 
 export interface IBenefit {
-  code: string;
+  id: string;
   name: string;
 }
 
@@ -26,7 +26,7 @@ export interface IBenefitClassStructure extends Document {
 }
 
 const BenefitSchema = new Schema({
-  code: { type: String, required: true },
+  id: { type: String, required: true },
   name: { type: String, required: true },
 });
 
@@ -87,16 +87,16 @@ BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]
 
 // Add validation to ensure benefits are not assigned to multiple classes
 BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]) {
-  const benefitCodes = new Map<string, string>();
+  const benefitIds = new Map<string, string>();
 
   for (const cls of classes) {
     for (const benefit of cls.benefits) {
-      if (benefitCodes.has(benefit.code)) {
+      if (benefitIds.has(benefit.id)) {
         throw new Error(
-          `Benefit ${benefit.code} is already assigned to class ${benefitCodes.get(benefit.code)}`
+          `Benefit ${benefit.id} is already assigned to class ${benefitIds.get(benefit.id)}`
         );
       }
-      benefitCodes.set(benefit.code, cls.name);
+      benefitIds.set(benefit.id, cls.name);
     }
   }
 

@@ -6,6 +6,7 @@ import theme from './theme/theme';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import DebugPage from './pages/DebugPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import AppLayout from './components/layout/AppLayout';
@@ -41,6 +42,9 @@ function App() {
                 <Route index element={<Plans />} />
                 <Route path="create" element={<Plans />} />
               </Route>
+
+              {/* Debug Routes */}
+              <Route path="debug" element={<DebugPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -3,9 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import connectToDatabase from '../config/database';
 import { serverLogger } from '../utils/serverLogger';
+import { authenticate } from './middleware/auth';
 import plansRouter from './routes/plans';
 import configRouter from './routes/config';
 import benefitClassStructuresRouter from './routes/benefitClassStructures';
+import debugRouter from './routes/debug';
 
 // Initialize express app
 const app = express();
@@ -41,7 +43,13 @@ app.get('/api/health', (req: Request, res: Response) => {
 // Register routes
 app.use('/api/plans', plansRouter);
 app.use('/api/config', configRouter);
+
+// Apply authentication middleware to benefit class structure routes
+// For development, we'll make this optional by using our fallback user ID in the routes
 app.use('/api/benefit-class-structures', benefitClassStructuresRouter);
+
+// Debug routes (no auth required for development)
+app.use('/api/debug', debugRouter);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

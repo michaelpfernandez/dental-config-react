@@ -1,5 +1,5 @@
 export interface Benefit {
-  code: string;
+  id: string;
   name: string;
 }
 
@@ -28,7 +28,7 @@ export interface BenefitClassStructure {
 }
 
 export interface AvailableBenefit {
-  code: string;
+  id: string;
   name: string;
   classId: string;
 }

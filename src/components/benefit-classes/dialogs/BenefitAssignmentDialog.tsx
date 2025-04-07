@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { ClearIcon } from '../common/icons';
 import { ConfirmationButtons } from '../common/ConfirmationButtons';
+import { clientLogger } from '../../../utils/clientLogger';
 
 interface Benefit {
   id: string;
@@ -47,6 +48,7 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
   );
 
   const handleSelectBenefit = (benefit: Benefit) => {
+    clientLogger.info(`Selected benefit from search: ${benefit.name} (ID: ${benefit.id})`);
     setSearchQuery(benefit.name);
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
@@ -147,20 +149,15 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
                     </div>
                   )}
                   {searchQuery && (
-                    <IconButton
-                      onClick={handleClear}
-                      size="small"
-                      style={{
-                        marginRight: '8px',
-                        color: 'rgba(0, 0, 0, 0.54)',
-                      }}
-                    >
+                    <IconButton onClick={handleClear} edge="end" aria-label="clear" size="small">
                       <ClearIcon />
                     </IconButton>
                   )}
                 </>
               ),
             }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           />
         </div>
         {filteredBenefits.length === 0 ? (

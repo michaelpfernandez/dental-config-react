@@ -6,7 +6,7 @@ export const benefitClassApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: '/api',
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('dental_user');
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
@@ -38,7 +38,7 @@ export const benefitClassApi = createApi({
       query: (data) => ({
         url: '/benefit-class-structures',
         method: 'POST',
-        body: data,
+        body: { classConfig: data },
       }),
       invalidatesTags: [{ type: 'BenefitClassStructure', id: 'LIST' }],
     }),
@@ -50,7 +50,7 @@ export const benefitClassApi = createApi({
       query: ({ id, data }) => ({
         url: `/benefit-class-structures/${id}`,
         method: 'PUT',
-        body: data,
+        body: { classConfig: data },
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: 'BenefitClassStructure', id },

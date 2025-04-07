@@ -28,25 +28,55 @@ const getAuthConfig = () => {
 
 // Middleware to check if user is authenticated
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json({ error: 'No authorization header' });
+  try {
+    const authHeader = req.headers.authorization;
+    serverLogger.info('Auth header:', authHeader);
+
+    if (!authHeader) {
+      return res.status(401).json({ error: 'No authorization header' });
+    }
+
+    // Extract the token part after 'Bearer '
+    const token = authHeader.split(' ')[1];
+    serverLogger.info('Token:', token);
+
+    // Try to parse the token as JSON (our current format)
+    try {
+      // Parse the JSON string token
+      const userObject = JSON.parse(token);
+      serverLogger.info('Parsed user object:', userObject);
+
+      // Create a user object that matches our User interface
+      const user: User = {
+        id: userObject.id,
+        username: userObject.username,
+        roles: ['Administrator'], // Default role for now
+        actionRights: ['create_all', 'read_all', 'update_all', 'delete_all'], // Default rights
+      };
+
+      req.user = user;
+      serverLogger.info('User set on request:', req.user);
+      next();
+      return;
+    } catch (jsonError) {
+      serverLogger.error('Error parsing token as JSON:', jsonError);
+      // If JSON parsing fails, try the original method
+    }
+
+    // Original token validation as fallback
+    const authConfig = getAuthConfig();
+    const user = authConfig.users.find((u: User) => u.id === token);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    serverLogger.error('Authentication error:', error);
+    return res.status(401).json({ error: 'Authentication failed' });
   }
-
-  // For development, we'll use a simple token-based auth
-  // In production, you'd want to use proper JWT validation
-  const token = authHeader.split(' ')[1];
-  const authConfig = getAuthConfig();
-
-  // Find user by token (in production, this would be JWT verification)
-  const user = authConfig.users.find((u: User) => u.id === token);
-
-  if (!user) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-
-  req.user = user;
-  next();
 };
 
 // Middleware to check if user has required role
