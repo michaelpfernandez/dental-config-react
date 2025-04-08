@@ -35,9 +35,17 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Log the request body and classConfig for debugging
-    serverLogger.info('Request body:', req.body);
-    serverLogger.info('classConfig:', classConfig);
+    // Log the full request body and classConfig for debugging
+    serverLogger.info('Full request body:', JSON.stringify(req.body, null, 2));
+    serverLogger.info('Class config:', JSON.stringify(req.body.classConfig, null, 2));
+
+    // Log the effective date specifically if it exists
+    if (req.body.classConfig?.effectiveDate) {
+      serverLogger.info('Effective date from request:', req.body.classConfig.effectiveDate);
+      serverLogger.info('Type of effective date:', typeof req.body.classConfig.effectiveDate);
+    } else {
+      serverLogger.warn('No effective date found in request!');
+    }
 
     // Log the classes and benefits specifically
     if (classConfig.classes && Array.isArray(classConfig.classes)) {
@@ -69,12 +77,15 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     // For development purposes, use a temporary user ID if authentication fails
     const tempUserId = 'temp-admin-user';
 
-    // Create a deep copy of classConfig to avoid reference issues
-    const classConfigCopy = JSON.parse(JSON.stringify(classConfig));
-    serverLogger.info('Creating BenefitClassStructure with copied config');
+    // Log the effective date for debugging
+    if (req.body.classConfig?.effectiveDate) {
+      serverLogger.info('Received effective date:', req.body.classConfig.effectiveDate);
+    } else {
+      serverLogger.warn('No effective date found in request!');
+    }
 
     const structure = new BenefitClassStructure({
-      ...classConfig,
+      ...req.body.classConfig,
       createdBy: req.user?.id || tempUserId, // Use fallback if req.user?.id is undefined
       createdAt: new Date(),
       lastModifiedBy: req.user?.id || tempUserId, // Use fallback if req.user?.id is undefined
@@ -145,9 +156,17 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Log the request body and classConfig for debugging
-    serverLogger.info('Update - Request body:', req.body);
-    serverLogger.info('Update - classConfig:', classConfig);
+    // Log the full request body and classConfig for debugging
+    serverLogger.info('Full request body:', JSON.stringify(req.body, null, 2));
+    serverLogger.info('Class config:', JSON.stringify(req.body.classConfig, null, 2));
+
+    // Log the effective date specifically if it exists
+    if (req.body.classConfig?.effectiveDate) {
+      serverLogger.info('Effective date from request:', req.body.classConfig.effectiveDate);
+      serverLogger.info('Type of effective date:', typeof req.body.classConfig.effectiveDate);
+    } else {
+      serverLogger.warn('No effective date found in request!');
+    }
 
     // Debug authentication information
     serverLogger.info('Update - Auth header:', req.headers.authorization);
@@ -157,82 +176,37 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     // For development purposes, use a temporary user ID if authentication fails
     const tempUserId = 'temp-admin-user';
 
+    // Log the effective date for debugging
+    if (req.body.classConfig?.effectiveDate) {
+      serverLogger.info('Received effective date:', req.body.classConfig.effectiveDate);
+    } else {
+      serverLogger.warn('No effective date found in request!');
+    }
+
     const structure = await BenefitClassStructure.findByIdAndUpdate(
       req.params.id,
       {
-        ...classConfig,
-        lastModifiedBy: req.user?.id || tempUserId, // Use fallback if req.user?.id is undefined
-        lastModifiedAt: new Date(),
+        $set: {
+          ...classConfig,
+          lastModifiedBy: tempUserId,
+          lastModifiedAt: new Date(),
+        },
       },
       { new: true }
     );
 
     if (!structure) {
-      return res.status(404).json({ error: 'Benefit class structure not found' });
+      return res.status(404).json({
+        error: 'Not found',
+        details: 'Benefit class structure not found',
+      });
     }
 
     res.json(structure);
   } catch (error) {
     serverLogger.error('Update benefit class structure error:', error);
-    res.status(400).json({
+    res.status(500).json({
       error: 'Failed to update benefit class structure',
-      details: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
-// Update benefit class structure
-router.put('/:id', async (req: AuthRequest, res: Response) => {
-  try {
-    const { classes } = req.body;
-
-    // Early return if classes is undefined
-    if (!classes) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: 'classes is required',
-      });
-    }
-
-    // Validate classes
-    const validationErrors: string[] = [];
-    classes.forEach((classData: IClass, index: number) => {
-      if (!classData.name) {
-        validationErrors.push(`Class ${index + 1}: Name is required`);
-      }
-      if (!Array.isArray(classData.benefits)) {
-        validationErrors.push(`Class ${index + 1}: Benefits must be an array`);
-      }
-    });
-
-    if (validationErrors.length > 0) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: validationErrors,
-      });
-    }
-
-    // Update classes
-    const structure = await BenefitClassStructure.findById(req.params.id);
-
-    if (!structure) {
-      return res.status(404).json({ error: 'Benefit class structure not found' });
-    }
-
-    structure.classes = classes.map((classData: IClass) => ({
-      ...classData,
-      benefits: classData.benefits || [],
-    }));
-
-    structure.lastModifiedBy = req.user?.id || '';
-    structure.lastModifiedAt = new Date();
-
-    await structure.save();
-    res.json(structure);
-  } catch (error) {
-    serverLogger.error('Configure benefit class structure error:', error);
-    res.status(400).json({
-      error: 'Validation failed',
       details: error instanceof Error ? error.message : String(error),
     });
   }

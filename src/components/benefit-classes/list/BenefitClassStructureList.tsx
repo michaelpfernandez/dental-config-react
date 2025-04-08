@@ -86,7 +86,7 @@ const BenefitClassStructureList: React.FC = () => {
                   <TableCell>{structure.name}</TableCell>
                   <TableCell>{structure.marketSegment}</TableCell>
                   <TableCell>{structure.productType}</TableCell>
-                  <TableCell>{new Date(structure.effectiveDate).toLocaleDateString()}</TableCell>
+                  <TableCell>{structure.effectiveDate}</TableCell>
                   <TableCell>
                     <Typography color="primary">{structure.numberOfClasses}</Typography>
                   </TableCell>

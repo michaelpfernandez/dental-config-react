@@ -115,9 +115,7 @@ const BenefitClassStructureDetails: React.FC = () => {
               <Typography>Product Type: {structure.productType}</Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography>
-                Effective Date: {new Date(structure.effectiveDate).toLocaleDateString()}
-              </Typography>
+              <Typography>Effective Date: {structure.effectiveDate}</Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography>Number of Classes: {structure.numberOfClasses}</Typography>

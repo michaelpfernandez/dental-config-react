@@ -14,7 +14,7 @@ export interface IClass {
 
 export interface IBenefitClassStructure extends Document {
   name: string;
-  effectiveDate: Date;
+  effectiveDate: string;
   marketSegment: MarketSegment;
   productType: ProductType;
   numberOfClasses: number;
@@ -39,7 +39,16 @@ const ClassSchema = new Schema({
 const BenefitClassStructureSchema = new Schema(
   {
     name: { type: String, required: true },
-    effectiveDate: { type: Date, required: true },
+    effectiveDate: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (v: string) {
+          return /^\d{4}-\d{2}-\d{2}$/.test(v);
+        },
+        message: 'Effective date must be in YYYY-MM-DD format',
+      },
+    },
     marketSegment: {
       type: String,
       enum: Object.values(MarketSegment),

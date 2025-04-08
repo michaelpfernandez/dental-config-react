@@ -121,9 +121,7 @@ const FetchSavedStructures: React.FC = () => {
           {structuresList.map((structure) => (
             <Paper key={structure._id} sx={{ p: 2, mb: 2 }}>
               <Typography variant="subtitle1">{structure.name}</Typography>
-              <Typography variant="body2">
-                Effective Date: {new Date(structure.effectiveDate).toLocaleDateString()}
-              </Typography>
+              <Typography variant="body2">Effective Date: {structure.effectiveDate}</Typography>
               <Typography variant="body2">Market Segment: {structure.marketSegment}</Typography>
               <Typography variant="body2">Product Type: {structure.productType}</Typography>
               <Typography variant="body2">
