@@ -140,8 +140,8 @@ const BenefitClassStructureDetails: React.FC = () => {
                 {classItem.benefits.length > 0 ? (
                   <Box>
                     {classItem.benefits.map((benefit) => (
-                      <Typography key={benefit.code} fontSize="small">
-                        {benefit.name} ({benefit.code})
+                      <Typography key={benefit.id} fontSize="small">
+                        {benefit.name} ({benefit.id})
                       </Typography>
                     ))}
                   </Box>

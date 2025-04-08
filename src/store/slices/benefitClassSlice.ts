@@ -54,7 +54,7 @@ const benefitClassSlice = createSlice({
     },
     addBenefitToClass: (
       state,
-      action: PayloadAction<{ classId: string; benefit: { code: string; name: string } }>
+      action: PayloadAction<{ classId: string; benefit: { id: string; name: string } }>
     ) => {
       if (state.localStructure) {
         const { classId, benefit } = action.payload;
@@ -77,15 +77,15 @@ const benefitClassSlice = createSlice({
     },
     removeBenefitFromClass: (
       state,
-      action: PayloadAction<{ classId: string; benefitCode: string }>
+      action: PayloadAction<{ classId: string; benefitId: string }>
     ) => {
       if (state.localStructure) {
-        const { classId, benefitCode } = action.payload;
+        const { classId, benefitId } = action.payload;
         const updatedClasses = state.localStructure.classes.map((cls) => {
           if (cls.id === classId) {
             return {
               ...cls,
-              benefits: cls.benefits.filter((b) => b.code !== benefitCode),
+              benefits: cls.benefits.filter((b) => b.id !== benefitId),
             };
           }
           return cls;
