@@ -113,8 +113,19 @@ const BenefitClassSummary: React.FC = () => {
       // Show success message or redirect
       alert('Benefit class structure saved successfully!');
     } catch (err) {
-      // Handle errors
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      // Extract error message from MongoDB validation error
+      let errorMessage = 'An unknown error occurred';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        // Check if this is a MongoDB validation error
+        if (errorMessage.includes('validation failed')) {
+          // Extract the specific validation error message
+          const validationMessage = errorMessage.split('validation failed: ')[1];
+          if (validationMessage) {
+            errorMessage = `Validation error: ${validationMessage}`;
+          }
+        }
+      }
       setError(errorMessage);
       alert(`Error saving benefit class structure: ${errorMessage}`);
     } finally {
