@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Typography, Container, Box, Divider, Paper } from '@mui/material';
+import { Typography, Container, Box } from '@mui/material';
 import EditableSummaryCard, { PlanSummary } from '../card/EditableSummaryCard';
 import BenefitClassTable from '../table/BenefitClassTable';
 import { SaveButtons } from '../common/SaveButtons';
 import { useActionBar } from '../../../context/ActionBarContext';
-import {
-  useCreateBenefitClassStructureMutation,
-  useUpdateBenefitClassStructureMutation,
-} from '../../../store/apis/benefitClassApi';
+import { useCreateBenefitClassStructureMutation } from '../../../store/apis/benefitClassApi';
 
 const BenefitClassSummary: React.FC = () => {
   const location = useLocation();
   const formData = location.state as PlanSummary & { numberOfClasses: number };
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -25,21 +21,23 @@ const BenefitClassSummary: React.FC = () => {
     numberOfClasses: formData.numberOfClasses,
   });
 
+  const [classData, setClassData] = useState<
+    Array<{ id: string; name: string; benefits: Array<{ id: string; name: string }> }>
+  >([]);
+
   // Get the action bar context
   const { setActions, clearActions } = useActionBar();
 
   // Redux mutation hooks
   const [createBenefitClassStructure, { isLoading: isCreating }] =
     useCreateBenefitClassStructureMutation();
-  const [updateBenefitClassStructure, { isLoading: isUpdating }] =
-    useUpdateBenefitClassStructureMutation();
 
   useEffect(() => {
     setLoading(false);
     setError(null);
 
     // Update isSaving when mutation state changes
-    setIsSaving(isCreating || isUpdating);
+    setIsSaving(isCreating);
 
     // Set up the action bar buttons when the component mounts
     setActions([
@@ -51,12 +49,7 @@ const BenefitClassSummary: React.FC = () => {
 
     // Clear actions when component unmounts
     return () => clearActions();
-  }, [setActions, clearActions, isCreating, isUpdating, planSummary]);
-
-  // State to store class data from BenefitClassTable
-  const [classData, setClassData] = useState<
-    Array<{ id: string; name: string; benefits: Array<{ id: string; name: string }> }>
-  >([]);
+  }, [setActions, clearActions, isCreating, planSummary]);
 
   // Function to handle class data changes from BenefitClassTable
   const handleClassDataChange = (
@@ -79,8 +72,6 @@ const BenefitClassSummary: React.FC = () => {
       numberOfClasses: planSummary.numberOfClasses,
       classes: classData,
     };
-    console.log('Sending payload to server:', payload);
-    console.log('Effective date being sent:', payload.effectiveDate);
     return payload;
   };
 
@@ -108,7 +99,7 @@ const BenefitClassSummary: React.FC = () => {
       const payload = preparePayload();
 
       // Call the API to create a new benefit class structure
-      const result = await createBenefitClassStructure(payload).unwrap();
+      await createBenefitClassStructure(payload).unwrap();
 
       // Show success message or redirect
       alert('Benefit class structure saved successfully!');

@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { BenefitClassStructure, IClass } from '../../models/BenefitClassStructure';
+import { BenefitClassStructure } from '../../models/BenefitClassStructure';
 import { serverLogger } from '../../utils/serverLogger';
 
 const router = Router();
