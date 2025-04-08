@@ -12,7 +12,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import AppLayout from './components/layout/AppLayout';
 import CreateBenefitClassForm from './components/benefit-classes/forms/CreateBenefitClassForm';
 import BenefitClassSummary from './components/benefit-classes/summary/BenefitClassSummary';
-import Limits from './components/create/Limits';
+import CreateLimitForm from './components/limits/forms/CreateLimitForm';
+import LimitSummary from './components/limits/summary/LimitSummary';
 import Plans from './components/create/Plans';
 
 function App() {
@@ -35,8 +36,9 @@ function App() {
                 <Route path="summary" element={<BenefitClassSummary />} />
               </Route>
               <Route path="limits">
-                <Route index element={<Limits />} />
-                <Route path="create" element={<Limits />} />
+                <Route index element={<CreateLimitForm />} />
+                <Route path="create" element={<CreateLimitForm />} />
+                <Route path="summary" element={<LimitSummary />} />
               </Route>
               <Route path="plans">
                 <Route index element={<Plans />} />
