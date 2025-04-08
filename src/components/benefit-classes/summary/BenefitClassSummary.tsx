@@ -9,7 +9,6 @@ import {
   useCreateBenefitClassStructureMutation,
   useUpdateBenefitClassStructureMutation,
 } from '../../../store/apis/benefitClassApi';
-import { clientLogger } from '../../../utils/clientLogger';
 
 const BenefitClassSummary: React.FC = () => {
   const location = useLocation();
@@ -68,12 +67,11 @@ const BenefitClassSummary: React.FC = () => {
     }>
   ) => {
     setClassData(newClassData);
-    clientLogger.info('Received updated class data from table:', newClassData);
   };
 
   // Function to transform component state into API payload format
   const preparePayload = () => {
-    return {
+    const payload = {
       name: planSummary.className,
       effectiveDate: planSummary.effectiveDate,
       marketSegment: planSummary.marketSegment,
@@ -81,6 +79,9 @@ const BenefitClassSummary: React.FC = () => {
       numberOfClasses: planSummary.numberOfClasses,
       classes: classData,
     };
+    console.log('Sending payload to server:', payload);
+    console.log('Effective date being sent:', payload.effectiveDate);
+    return payload;
   };
 
   // Handle saving the benefit class structure
@@ -103,25 +104,17 @@ const BenefitClassSummary: React.FC = () => {
         throw new Error('Product type is required');
       }
 
-      // Log current state for debugging
-      clientLogger.info('Current plan summary:', planSummary);
-      clientLogger.info('Current class data:', classData);
-
       // Prepare the payload
       const payload = preparePayload();
-      clientLogger.info('Saving benefit class structure with payload:', payload);
 
       // Call the API to create a new benefit class structure
-      clientLogger.info('Calling createBenefitClassStructure mutation...');
       const result = await createBenefitClassStructure(payload).unwrap();
-      clientLogger.info('Successfully saved benefit class structure:', result);
 
       // Show success message or redirect
       alert('Benefit class structure saved successfully!');
     } catch (err) {
       // Handle errors
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      clientLogger.error('Error saving benefit class structure:', err);
       setError(errorMessage);
       alert(`Error saving benefit class structure: ${errorMessage}`);
     } finally {
@@ -131,7 +124,6 @@ const BenefitClassSummary: React.FC = () => {
 
   // Handle canceling changes
   const handleCancel = () => {
-    clientLogger.info('Canceling changes');
     // Reset to original form data
     setPlanSummary({
       effectiveDate: formData.effectiveDate,
@@ -144,7 +136,6 @@ const BenefitClassSummary: React.FC = () => {
 
   const handleSummaryUpdate = (updatedSummary: PlanSummary & { numberOfClasses: number }) => {
     setPlanSummary(updatedSummary);
-    clientLogger.info('Updated plan summary:', updatedSummary);
   };
 
   if (loading) return <Typography>Loading...</Typography>;
