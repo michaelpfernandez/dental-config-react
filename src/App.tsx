@@ -14,6 +14,8 @@ import CreateBenefitClassForm from './components/benefit-classes/forms/CreateBen
 import BenefitClassSummary from './components/benefit-classes/summary/BenefitClassSummary';
 import CreateLimitForm from './components/limits/forms/CreateLimitForm';
 import LimitSummary from './components/limits/summary/LimitSummary';
+import LimitStructureList from './components/limits/pages/LimitStructureList';
+import LimitStructurePage from './components/limits/pages/LimitStructurePage';
 import Plans from './components/create/Plans';
 
 function App() {
@@ -36,9 +38,10 @@ function App() {
                 <Route path="summary" element={<BenefitClassSummary />} />
               </Route>
               <Route path="limits">
-                <Route index element={<CreateLimitForm />} />
+                <Route index element={<LimitStructureList />} />
                 <Route path="create" element={<CreateLimitForm />} />
                 <Route path="summary" element={<LimitSummary />} />
+                <Route path=":id" element={<LimitStructurePage />} />
               </Route>
               <Route path="plans">
                 <Route index element={<Plans />} />

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Typography, Container, Box } from '@mui/material';
+import { Container, Box, Typography } from '@mui/material';
 import { LimitFormData, Limit } from '../../../types/limitStructure';
 import { useActionBar } from '../../../context/ActionBarContext';
 import { SaveButtons } from '../../benefit-classes/common/SaveButtons';
 import { clientLogger } from '../../../utils/clientLogger';
+import LimitTable from '../table/LimitTable';
+import EditableSummaryCard from '../card/EditableSummaryCard';
 
 const LimitSummary: React.FC = () => {
   const location = useLocation();
@@ -26,28 +28,7 @@ const LimitSummary: React.FC = () => {
   const [limits, setLimits] = useState<Limit[]>([]);
 
   // Get the action bar context
-  const { setActions, clearActions } = useActionBar();
-
-  useEffect(() => {
-    setLoading(false);
-
-    // Set up the action bar buttons when the component mounts
-    setActions([
-      {
-        label: 'Save',
-        onClick: handleSave,
-        disabled: isSaving,
-      },
-      {
-        label: 'Cancel',
-        onClick: handleCancel,
-        disabled: isSaving,
-      },
-    ]);
-
-    // Clear actions when component unmounts
-    return () => clearActions();
-  }, [setActions, clearActions, isSaving]);
+  const { setActions } = useActionBar();
 
   // Function to handle save action
   const handleSave = async () => {
@@ -80,6 +61,20 @@ const LimitSummary: React.FC = () => {
     window.history.back();
   };
 
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // Set up the action bar buttons when the component mounts
+    setActions([
+      {
+        id: 'save-button',
+        component: <SaveButtons onSave={handleSave} onCancel={handleCancel} isSaving={isSaving} />,
+      },
+    ]);
+  }, [setActions, isSaving]);
+
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
@@ -92,26 +87,24 @@ const LimitSummary: React.FC = () => {
     <Container>
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Limit Structure: {limitData.name}
+          Limit Structure Summary
         </Typography>
-
-        <Box sx={{ mt: 2, mb: 4 }}>
-          <Typography variant="h6">Details</Typography>
-          <Typography>Effective Date: {limitData.effectiveDate}</Typography>
-          <Typography>Market Segment: {limitData.marketSegment}</Typography>
-          <Typography>Product Type: {limitData.productType}</Typography>
-          <Typography>Benefit Class Structure: {limitData.benefitClassStructureName}</Typography>
-        </Box>
+        <EditableSummaryCard
+          initialData={limitData}
+          onSave={(updatedData) => {
+            setLimitData(updatedData);
+          }}
+        />
 
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h6">Limits Configuration</Typography>
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            This is where the limit configuration table will be displayed. You'll be able to set
-            limits for each benefit in the selected benefit class structure.
+          <Typography variant="h6" gutterBottom>
+            Benefit Limits
           </Typography>
+          <LimitTable
+            limitStructureId={limitData.benefitClassStructureId}
+            onLimitDataChange={setLimits}
+          />
         </Box>
-
-        <SaveButtons onSave={handleSave} onCancel={handleCancel} disabled={isSaving} />
       </Box>
     </Container>
   );

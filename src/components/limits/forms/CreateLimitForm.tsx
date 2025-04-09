@@ -86,25 +86,19 @@ const CreateLimitForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCreateLimit = () => {
-    try {
-      // Validate form
-      if (
-        !formData.name ||
-        !formData.marketSegment ||
-        !formData.productType ||
-        !formData.benefitClassStructureId
-      ) {
-        alert('Please fill in all required fields');
-        return;
-      }
-
-      // Navigate to summary page with the form data
-      navigate('/limits/summary', {
-        state: formData,
-      });
-    } catch (error) {
-      clientLogger.error('Error creating limit structure:', error);
+    // Validate form
+    if (
+      !formData.name ||
+      !formData.marketSegment ||
+      !formData.productType ||
+      !formData.benefitClassStructureId
+    ) {
+      alert('Please fill in all required fields');
+      return;
     }
+
+    // Navigate to the limit structure page with the form data
+    navigate('/limits/summary', { state: formData });
   };
 
   return (

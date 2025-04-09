@@ -24,8 +24,8 @@ const ActionBar: React.FC = () => {
         zIndex: 1, // Lower z-index so it doesn't overlay content
       }}
     >
-      {actions.map((action) => (
-        <Box key={action.id} sx={{ ml: 1 }}>
+      {actions.map((action, index) => (
+        <Box key={action.label || index} sx={{ ml: 1 }}>
           {action.component}
         </Box>
       ))}
