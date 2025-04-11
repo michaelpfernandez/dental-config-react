@@ -7,6 +7,7 @@ import { authenticate } from './middleware/auth';
 import plansRouter from './routes/plans';
 import configRouter from './routes/config';
 import benefitClassStructuresRouter from './routes/benefitClassStructures';
+import limitStructuresRouter from './routes/limitStructures';
 import debugRouter from './routes/debug';
 
 // Initialize express app
@@ -47,6 +48,9 @@ app.use('/api/config', configRouter);
 // Apply authentication middleware to benefit class structure routes
 // For development, we'll make this optional by using our fallback user ID in the routes
 app.use('/api/benefit-class-structures', benefitClassStructuresRouter);
+
+// Limit structure routes
+app.use('/api/limit-structures', limitStructuresRouter);
 
 // Debug routes (no auth required for development)
 app.use('/api/debug', debugRouter);

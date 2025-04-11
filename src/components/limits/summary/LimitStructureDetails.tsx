@@ -19,6 +19,8 @@ import {
 import { EditIcon } from '../../benefit-classes/common/icons';
 import { ConfirmationButtons } from '../../benefit-classes/common/ConfirmationButtons';
 import { LimitStructure, Limit, LimitInterval } from '../../../types/limitStructure';
+import { LimitIntervalType } from '../../../types/enums';
+import { getDisplayName } from '../../../types/displayNames';
 
 interface LimitStructureDetailsProps {
   limitStructure: LimitStructure;
@@ -41,11 +43,11 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
     };
 
   const handleLimitChange =
-    (classId: string, benefitCode: string) =>
+    (classId: string, benefitId: string) =>
     (event: React.ChangeEvent<HTMLInputElement>, field: keyof Limit) => {
       setData((prev) => {
         const updatedLimits = prev.limits.map((limit) => {
-          if (limit.classId === classId && limit.benefitCode === benefitCode) {
+          if (limit.classId === classId && limit.benefitId === benefitId) {
             return {
               ...limit,
               [field]: event.target.value,
@@ -114,9 +116,9 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                 onChange={handleChange('defaultInterval')}
                 disabled={!isEditing}
               >
-                {Object.values(LimitInterval).map((interval) => (
+                {Object.values(LimitIntervalType).map((interval) => (
                   <MenuItem key={interval} value={interval}>
-                    {interval}
+                    {getDisplayName.limitInterval(interval)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -140,26 +142,25 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
           <TableHead>
             <TableRow>
               <TableCell>Class</TableCell>
-              <TableCell>Benefit Code</TableCell>
+              <TableCell>Benefit ID</TableCell>
               <TableCell>Benefit Name</TableCell>
               <TableCell>Limit Value</TableCell>
               <TableCell>Interval</TableCell>
-              <TableCell>Family/Individual</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {Object.entries(benefitsByClass).map(([classId, limits]) => (
               <React.Fragment key={classId}>
                 {limits.map((limit, index) => (
-                  <TableRow key={`${limit.classId}-${limit.benefitCode}`}>
+                  <TableRow key={`${limit.classId}-${limit.benefitId}`}>
                     {index === 0 && <TableCell rowSpan={limits.length}>Class {classId}</TableCell>}
-                    <TableCell>{limit.benefitCode}</TableCell>
+                    <TableCell>{limit.benefitId}</TableCell>
                     <TableCell>{limit.benefitName}</TableCell>
                     <TableCell>
                       <TextField
                         type="number"
-                        value={limit.value}
-                        onChange={(e) => handleLimitChange(classId, limit.benefitCode)(e, 'value')}
+                        value={limit.quantity}
+                        onChange={(e) => handleLimitChange(classId, limit.benefitId)(e, 'quantity')}
                         disabled={!isEditing}
                         size="small"
                       />
@@ -167,30 +168,16 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                     <TableCell>
                       <TextField
                         select
-                        value={limit.interval || data.defaultInterval}
-                        onChange={(e) =>
-                          handleLimitChange(classId, limit.benefitCode)(e, 'interval')
-                        }
+                        value={limit.interval.type}
+                        onChange={(e) => handleLimitChange(classId, limit.benefitId)(e, 'interval')}
                         disabled={!isEditing}
                         size="small"
                       >
-                        {Object.values(LimitInterval).map((interval) => (
+                        {Object.values(LimitIntervalType).map((interval) => (
                           <MenuItem key={interval} value={interval}>
-                            {interval}
+                            {getDisplayName.limitInterval(interval)}
                           </MenuItem>
                         ))}
-                      </TextField>
-                    </TableCell>
-                    <TableCell>
-                      <TextField
-                        select
-                        value={limit.type}
-                        onChange={(e) => handleLimitChange(classId, limit.benefitCode)(e, 'type')}
-                        disabled={!isEditing}
-                        size="small"
-                      >
-                        <MenuItem value="individual">Individual</MenuItem>
-                        <MenuItem value="family">Family</MenuItem>
                       </TextField>
                     </TableCell>
                   </TableRow>

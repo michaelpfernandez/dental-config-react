@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -9,7 +9,13 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Button,
 } from '@mui/material';
+import { useActionBar } from '../../context/ActionBarContext';
+import { useCreateLimitStructureMutation } from '../../store/apis/limitApi';
+import { MarketSegment, ProductType, LimitIntervalType, UnitType } from '../../types/enums';
+import { getDisplayName } from '../../types/displayNames';
+import { SaveButtons } from '../benefit-classes/common/SaveButtons';
 
 interface LimitOption {
   value: number | string;
@@ -38,7 +44,22 @@ const waitingPeriodOptions: LimitOption[] = [
 ];
 
 const Limits: React.FC = () => {
-  const [limits, setLimits] = React.useState({
+  // State management
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Get the action bar context
+  const { setActions, clearActions } = useActionBar();
+
+  // Redux mutation hooks
+  const [createLimit, { isLoading: isCreating, error: mutationError }] =
+    useCreateLimitStructureMutation();
+  console.log('Mutation state:', { isCreating, mutationError });
+
+  // Form state
+  const [limits, setLimits] = useState({
     annualMax: 1500,
     deductibleIndividual: 50,
     deductibleFamily: 150,
@@ -46,15 +67,176 @@ const Limits: React.FC = () => {
     waitingPeriodMajor: 12,
   });
 
+  const [marketSegment, setMarketSegment] = useState(MarketSegment.Large);
+
+  // Set up action bar and track mutation state
+  useEffect(() => {
+    console.log('Setting up action bar with state:', { isCreating, isSaving, isDirty });
+    setLoading(false);
+    setError(null);
+
+    // Update isSaving when mutation state changes
+    setIsSaving(isCreating);
+
+    console.log('Registering save button in action bar');
+    // Set up the action bar buttons
+    setActions([
+      {
+        id: 'save-button',
+        component: (
+          <SaveButtons
+            onSave={handleSave}
+            onCancel={handleCancel}
+            isSaving={isSaving}
+            disabled={!isDirty}
+          />
+        ),
+      },
+    ]);
+
+    // Clear actions when component unmounts
+    return () => clearActions();
+  }, [setActions, clearActions, isCreating, isSaving, isDirty, handleSave, handleCancel]);
+
+  useEffect(() => {
+    console.log('Action bar effect running:', { isDirty, isSaving });
+    // Always show the save buttons, but disable them when not dirty
+    setActions([
+      {
+        id: 'save-limits',
+        component: (
+          <SaveButtons
+            onSave={handleSave}
+            onCancel={() => {
+              setIsDirty(false);
+              setError(null);
+            }}
+            isSaving={isSaving}
+            disabled={!isDirty}
+          />
+        ),
+      },
+    ]);
+
+    return () => {
+      clearActions();
+    };
+  }, [isDirty, setActions, clearActions, handleSave, isSaving]);
+
+  // Handle canceling changes
+  const handleCancel = () => {
+    // Reset to initial state
+    setLimits({
+      annualMax: 1500,
+      deductibleIndividual: 50,
+      deductibleFamily: 150,
+      waitingPeriodBasic: 0,
+      waitingPeriodMajor: 12,
+    });
+    setIsDirty(false);
+    setError(null);
+  };
+
+  // Function to prepare the payload for the API
+  const preparePayload = () => {
+    return {
+      name: 'Default Limit Structure',
+      effectiveDate: new Date().toISOString().split('T')[0],
+      marketSegment: marketSegment,
+      productType: ProductType.PPO,
+      limits: [
+        {
+          id: 'annual-max',
+          classId: 'all',
+          className: 'All Classes',
+          benefitId: 'all',
+          benefitName: 'All Benefits',
+          quantity: limits.annualMax,
+          unit: UnitType.N_A,
+          interval: { type: LimitIntervalType.PerYear, value: 1 },
+        },
+      ],
+    };
+  };
+
   const handleChange = (field: string) => (event: any) => {
+    const value = event.target.value;
+    console.log(`Changing ${field} to:`, value);
+
     setLimits((prev) => ({
       ...prev,
-      [field]: event.target.value,
+      [field]: value,
     }));
+
+    setIsDirty(true);
+    setError(null);
   };
+
+  const handleSave = async () => {
+    console.log('handleSave called');
+    console.log('Component state at save:', { limits, isDirty, isCreating, isSaving });
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      // Validate required fields
+      if (!limits.annualMax) {
+        throw new Error('Annual maximum is required');
+      }
+
+      // Prepare and log the payload
+      const payload = preparePayload();
+      console.log('Saving with payload:', payload);
+
+      // Call the API
+      console.log('Calling createLimit with payload:', payload);
+      try {
+        const result = await createLimit(payload).unwrap();
+        console.log('Save successful:', result);
+      } catch (apiError) {
+        console.error('API call failed:', apiError);
+        throw apiError;
+      }
+
+      // Update UI state
+      setIsDirty(false);
+      alert('Limit structure saved successfully!');
+    } catch (err) {
+      console.error('Error in handleSave:', err);
+      console.log('Error details:', {
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : String(err),
+      });
+
+      // Extract error message
+      let errorMessage = 'An unknown error occurred';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        if (errorMessage.includes('validation failed')) {
+          const validationMessage = errorMessage.split('validation failed: ')[1];
+          if (validationMessage) {
+            errorMessage = `Validation error: ${validationMessage}`;
+          }
+        }
+      }
+      console.error('Save failed:', errorMessage);
+      setError(errorMessage);
+      alert(`Error saving limit structure: ${errorMessage}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <Box sx={{ pt: 3 }}>
+      {error && (
+        <Typography color="error" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
       <Typography variant="h5" gutterBottom>
         Plan Limits
       </Typography>
@@ -133,6 +315,35 @@ const Limits: React.FC = () => {
                           </MenuItem>
                         );
                       })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Market Segment */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Market Segment
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>Market Segment</InputLabel>
+                    <Select
+                      value={marketSegment}
+                      onChange={(e) => setMarketSegment(e.target.value as MarketSegment)}
+                      label="Market Segment"
+                    >
+                      {Object.values(MarketSegment).map((segment) => (
+                        <MenuItem key={segment} value={segment}>
+                          {getDisplayName.marketSegment(segment)}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>

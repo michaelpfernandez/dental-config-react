@@ -2,31 +2,63 @@
   "benefits": [
     {
       "id": 1,
-      "name": "Prophylaxis - Adult"
+      "name": "Exams & X-rays"
     },
     {
       "id": 2,
-      "name": "Periodic Oral Evaluation"
+      "name": "Cleanings"
     },
     {
       "id": 3,
-      "name": "Bitewings - Four Films"
+      "name": "Topical Fluoride"
     },
     {
       "id": 4,
-      "name": "Amalgam - One Surface"
+      "name": "Space Maintainers"
     },
     {
       "id": 5,
-      "name": "Resin - One Surface, Anterior"
+      "name": "Restorative Fillings"
     },
     {
       "id": 6,
-      "name": "Crown - Porcelain/Ceramic"
+      "name": "Oral Surgery"
     },
     {
       "id": 7,
-      "name": "Root Canal - Molar"
+      "name": "Endodontics"
+    },
+    {
+      "id": 8,
+      "name": "Periodontics"
+    },
+    {
+      "id": 9,
+      "name": "Anesthesia"
+    },
+    {
+      "id": 10,
+      "name": "Restorative Crowns"
+    },
+    {
+      "id": 11,
+      "name": "Partial & Complete Dentures"
+    },
+    {
+      "id": 12,
+      "name": "Orthodontics"
+    },
+    {
+      "id": 13,
+      "name": "Invisalign"
+    },
+    {
+      "id": 14,
+      "name": "Sealants"
+    },
+    {
+      "id": 15,
+      "name": "Implants & Bridges"
     }
   ]
 }

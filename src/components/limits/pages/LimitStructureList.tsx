@@ -18,6 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LimitStructure } from '../../../types/limitStructure';
+import { MarketSegment, ProductType, LimitIntervalType } from '../../../types/enums';
 
 const LimitStructureList: React.FC = () => {
   const navigate = useNavigate();
@@ -40,8 +41,8 @@ const LimitStructureList: React.FC = () => {
             _id: 'limit-structure-1',
             name: 'Standard Dental Limits',
             effectiveDate: '2025-01-01',
-            marketSegment: 'Commercial',
-            productType: 'Dental',
+            marketSegment: MarketSegment.Individual,
+            productType: ProductType.PPO,
             benefitClassStructureId: 'class-structure-1',
             benefitClassStructureName: 'Standard Dental Class Structure',
             limits: [
@@ -51,19 +52,20 @@ const LimitStructureList: React.FC = () => {
                 benefitName: 'Preventive Care',
                 quantity: 2,
                 interval: {
-                  type: 'per_year',
+                  type: LimitIntervalType.PerYear,
                   value: 1,
                 },
               },
             ],
-            createdAt: '2025-03-15T10:30:00Z',
+            createdAt: new Date('2025-03-15T10:30:00Z'),
+            lastModifiedAt: new Date('2025-03-15T10:30:00Z'),
           },
           {
             _id: 'limit-structure-2',
             name: 'Premium Dental Limits',
             effectiveDate: '2025-02-01',
-            marketSegment: 'Individual',
-            productType: 'Dental',
+            marketSegment: MarketSegment.Individual,
+            productType: ProductType.PPO,
             benefitClassStructureId: 'class-structure-2',
             benefitClassStructureName: 'Premium Dental Class Structure',
             limits: [
@@ -73,12 +75,13 @@ const LimitStructureList: React.FC = () => {
                 benefitName: 'Basic Restorative',
                 quantity: 3,
                 interval: {
-                  type: 'per_year',
+                  type: LimitIntervalType.PerYear,
                   value: 1,
                 },
               },
             ],
-            createdAt: '2025-03-20T14:45:00Z',
+            createdAt: new Date('2025-03-20T14:45:00Z'),
+            lastModifiedAt: new Date('2025-03-20T14:45:00Z'),
           },
         ];
 
@@ -155,13 +158,14 @@ const LimitStructureList: React.FC = () => {
                 <TableCell>Product Type</TableCell>
                 <TableCell>Benefit Class Structure</TableCell>
                 <TableCell>Created At</TableCell>
+                <TableCell>Last Modified At</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {limitStructures.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={8} align="center">
                     No limit structures found. Click "Create New Limit Structure" to add one.
                   </TableCell>
                 </TableRow>
@@ -169,13 +173,16 @@ const LimitStructureList: React.FC = () => {
                 limitStructures.map((structure) => (
                   <TableRow key={structure._id}>
                     <TableCell>{structure.name}</TableCell>
-                    <TableCell>{new Date(structure.effectiveDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{structure.effectiveDate}</TableCell>
                     <TableCell>{structure.marketSegment}</TableCell>
                     <TableCell>{structure.productType}</TableCell>
                     <TableCell>{structure.benefitClassStructureName}</TableCell>
                     <TableCell>
-                      {structure.createdAt
-                        ? new Date(structure.createdAt).toLocaleDateString()
+                      {structure.createdAt ? structure.createdAt.toLocaleDateString() : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {structure.lastModifiedAt
+                        ? structure.lastModifiedAt.toLocaleDateString()
                         : 'N/A'}
                     </TableCell>
                     <TableCell>

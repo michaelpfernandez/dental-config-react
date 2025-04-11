@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { LimitStructure, LimitFormData } from '../../types/limitStructure';
+import { LimitStructure } from '../../types/limitStructure';
+import { clientLogger } from '../../utils/clientLogger';
 
 export const limitApi = createApi({
   reducerPath: 'limitApi',
@@ -25,7 +26,7 @@ export const limitApi = createApi({
     }),
     createLimitStructure: builder.mutation<LimitStructure, Partial<LimitStructure>>({
       query: (limitData) => {
-        console.log('createLimitStructure mutation starting with data:', limitData);
+        clientLogger.info('Starting createLimitStructure mutation:', { data: limitData });
         return {
           url: '/limit-structures',
           method: 'POST',
@@ -33,11 +34,11 @@ export const limitApi = createApi({
         };
       },
       transformResponse: (response: any) => {
-        console.log('createLimitStructure API response:', response);
+        clientLogger.info('createLimitStructure response received:', { response });
         return response as LimitStructure;
       },
       transformErrorResponse: (error: any) => {
-        console.error('createLimitStructure API error:', error);
+        clientLogger.error('createLimitStructure error:', { error });
         return error;
       },
 

@@ -25,7 +25,7 @@ const ActionBar: React.FC = () => {
       }}
     >
       {actions.map((action, index) => (
-        <Box key={action.label || index} sx={{ ml: 1 }}>
+        <Box key={action.id} sx={{ ml: 1 }}>
           {action.component}
         </Box>
       ))}

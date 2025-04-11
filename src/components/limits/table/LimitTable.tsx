@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Limit, LimitInterval } from '../../../types/limitStructure';
 import { useGetBenefitClassStructureByIdQuery } from '../../../store/apis/benefitClassApi';
+import { UnitType, LimitIntervalType } from '../../../types/enums';
 
 export interface LimitTableProps {
   limitStructureId: string;
@@ -29,23 +30,24 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
   // Initialize limits when benefit class structure is loaded
   useEffect(() => {
     if (benefitClassStructure) {
-      // Create initial limits for each benefit in each class
       const initialLimits: Limit[] = benefitClassStructure.classes.flatMap((classData) =>
         classData.benefits.map((benefit) => ({
-          id: `${classData.id}-${benefit.code}`,
+          id: `${classData.id}-${benefit.id}`,
           classId: classData.id,
           className: classData.name,
-          benefitCode: benefit.code,
+          benefitId: benefit.id,
           benefitName: benefit.name,
-          value: 0,
-          interval: { type: 'per_year', value: 1 },
-          type: 'n/a',
+          quantity: 0,
+          interval: { type: LimitIntervalType.PerYear, value: 1 },
+          unit: UnitType.N_A,
         }))
       );
       setLimits(initialLimits);
-      onLimitDataChange(initialLimits);
+      if (JSON.stringify(initialLimits) !== JSON.stringify(limits)) {
+        onLimitDataChange(initialLimits);
+      }
     }
-  }, [benefitClassStructure, onLimitDataChange]);
+  }, [benefitClassStructure]);
 
   const handleLimitChange = (limitId: string, field: keyof Limit, value: any) => {
     const newLimits = limits.map((limit) =>
@@ -55,13 +57,13 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
     onLimitDataChange(newLimits);
   };
 
-  const formatIntervalType = (type: string): string => {
+  const formatIntervalType = (type: LimitIntervalType): string => {
     switch (type) {
-      case 'per_visit':
+      case LimitIntervalType.PerVisit:
         return 'Per Visit';
-      case 'per_year':
+      case LimitIntervalType.PerYear:
         return 'Per Year';
-      case 'per_lifetime':
+      case LimitIntervalType.PerLifetime:
         return 'Per Lifetime';
       default:
         return type;
@@ -80,7 +82,6 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
     return <Typography color="error">Error: Could not load benefit class structure</Typography>;
   }
 
-  // Group limits by class
   const limitsByClass = limits.reduce(
     (acc, limit) => {
       if (!acc[limit.classId]) {
@@ -129,9 +130,9 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
                     <TableCell>
                       <TextField
                         type="number"
-                        value={limit.value}
+                        value={limit.quantity}
                         onChange={(e) =>
-                          handleLimitChange(limit.id, 'value', Number(e.target.value))
+                          handleLimitChange(limit.id, 'quantity', Number(e.target.value))
                         }
                         size="small"
                         inputProps={{ min: 0, max: 99, style: { width: '50px' } }}
@@ -139,14 +140,16 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
                     </TableCell>
                     <TableCell>
                       <Select
-                        value={limit.type}
-                        onChange={(e) => handleLimitChange(limit.id, 'type', e.target.value)}
+                        value={limit.unit}
+                        onChange={(e) =>
+                          handleLimitChange(limit.id, 'unit', e.target.value as UnitType)
+                        }
                         size="small"
                         sx={{ minWidth: 100 }}
                       >
-                        <MenuItem value="per_tooth">Per Tooth</MenuItem>
-                        <MenuItem value="per_item">Per Item</MenuItem>
-                        <MenuItem value="n/a">N/A</MenuItem>
+                        <MenuItem value={UnitType.PerTooth}>Per Tooth</MenuItem>
+                        <MenuItem value={UnitType.PerItem}>Per Item</MenuItem>
+                        <MenuItem value={UnitType.N_A}>N/A</MenuItem>
                       </Select>
                     </TableCell>
                     <TableCell>
@@ -161,9 +164,9 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
                         size="small"
                         sx={{ minWidth: 120 }}
                       >
-                        <MenuItem value="per_visit">Per Visit</MenuItem>
-                        <MenuItem value="per_year">Per Year</MenuItem>
-                        <MenuItem value="per_lifetime">Per Lifetime</MenuItem>
+                        <MenuItem value={LimitIntervalType.PerVisit}>Per Visit</MenuItem>
+                        <MenuItem value={LimitIntervalType.PerYear}>Per Year</MenuItem>
+                        <MenuItem value={LimitIntervalType.PerLifetime}>Per Lifetime</MenuItem>
                       </Select>
                     </TableCell>
                   </TableRow>

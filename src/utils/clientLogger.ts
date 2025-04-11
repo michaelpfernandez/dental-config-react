@@ -9,12 +9,16 @@ if (!loggingConfig.enabled) {
   log.setLevel(log.levels.SILENT);
 }
 
-// Creating a mock clientLogger to avoid import errors
+// Creating a real clientLogger that logs to console
 export const clientLogger = {
   info: (message: string, data?: any) => {
-    log.info(message, data);
+    if (loggingConfig.clientLogging.apiCalls) {
+      console.log('[INFO]', message, data);
+      log.info(message, data);
+    }
   },
   error: (message: string, data?: any) => {
+    console.error('[ERROR]', message, data);
     log.error(message, data);
   },
 };

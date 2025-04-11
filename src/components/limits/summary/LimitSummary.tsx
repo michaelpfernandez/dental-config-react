@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { clientLogger } from '../../../utils/clientLogger';
 import { Container, Box, Typography } from '@mui/material';
 import { LimitFormData, Limit } from '../../../types/limitStructure';
 import { useActionBar } from '../../../context/ActionBarContext';
 import { SaveButtons } from '../../benefit-classes/common/SaveButtons';
-import { clientLogger } from '../../../utils/clientLogger';
 import LimitTable from '../table/LimitTable';
 import EditableSummaryCard from '../card/EditableSummaryCard';
 import { useCreateLimitStructureMutation } from '../../../store/apis/limitApi';
@@ -28,13 +28,14 @@ const LimitSummary: React.FC = () => {
     productType: formData.productType,
     benefitClassStructureId: formData.benefitClassStructureId,
     benefitClassStructureName: formData.benefitClassStructureName,
+    limits: [], // Initialize empty limits array
   });
 
   // Placeholder for limits data that would come from the benefit class structure
   const [limits, setLimits] = useState<Limit[]>([]);
 
   // Get the action bar context
-  const { setActions } = useActionBar();
+  const { setActions, clearActions } = useActionBar();
 
   // Function to prepare the payload for the API
   const preparePayload = () => {
@@ -51,19 +52,18 @@ const LimitSummary: React.FC = () => {
       .filter((item) => item.missingFields.length > 0);
 
     if (missingFields.length > 0) {
-      console.warn('Missing required fields:', missingFields);
+      clientLogger.info('Missing fields in limit data:', { missingFields });
     }
 
-    console.log(
-      'Complete limit data:',
-      limits.map((limit) => ({
+    clientLogger.info('Complete limit data:', {
+      limits: limits.map((limit) => ({
         id: limit.id,
         benefitName: limit.benefitName,
         quantity: limit.quantity,
         unit: limit.unit,
         interval: limit.interval,
-      }))
-    );
+      })),
+    });
 
     const currentTime = new Date();
 
@@ -93,7 +93,7 @@ const LimitSummary: React.FC = () => {
 
   // Function to handle save action
   const handleSave = async () => {
-    console.log('handleSave called');
+    clientLogger.info('Starting save operation');
     try {
       setIsSaving(true);
       setError(null);
@@ -117,11 +117,11 @@ const LimitSummary: React.FC = () => {
 
       // Prepare and log the payload
       const payload = preparePayload();
-      console.log('Saving with payload:', payload);
+      clientLogger.info('Saving with payload:', { payload });
 
       // Call the API
       const result = await createLimit(payload).unwrap();
-      console.log('Save successful:', result);
+      clientLogger.info('Save successful:', { result });
 
       // Update UI state
       setIsDirty(false);
@@ -139,7 +139,7 @@ const LimitSummary: React.FC = () => {
           }
         }
       }
-      console.error('Save failed:', errorMessage);
+      clientLogger.error('Save operation failed:', { error: errorMessage });
       setError(errorMessage);
       alert(`Error saving limit structure: ${errorMessage}`);
     } finally {
@@ -157,14 +157,11 @@ const LimitSummary: React.FC = () => {
     setLoading(false);
   }, []);
 
+  // Set up action bar and handle state changes
   useEffect(() => {
     setLoading(false);
     setError(null);
-
-    // Update isSaving when mutation state changes
     setIsSaving(isCreating);
-
-    console.log('Setting up action bar with state:', { isCreating, isSaving, isDirty });
 
     // Set up the action bar buttons
     setActions([
@@ -182,8 +179,8 @@ const LimitSummary: React.FC = () => {
     ]);
 
     // Clear actions when component unmounts
-    return () => setActions([]);
-  }, [setActions, isCreating, isSaving, isDirty]);
+    return () => clearActions();
+  }, [setActions, clearActions, isCreating]);
 
   if (loading) {
     return <Typography>Loading...</Typography>;

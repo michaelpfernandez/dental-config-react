@@ -7,6 +7,8 @@
     { "id": 5, "name": "Periodontics" },
     { "id": 6, "name": "Oral Surgery" },
     { "id": 7, "name": "Diagnostics" },
-    { "id": 8, "name": "Preventive & Diagnostics" }
+    { "id": 8, "name": "Class I" },
+    { "id": 9, "name": "Class II" },
+    { "id": 10, "name": "Class III" }
   ]
 }

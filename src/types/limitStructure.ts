@@ -1,41 +1,47 @@
+import { MarketSegment, ProductType, LimitIntervalType, UnitType } from './enums';
+
 // Core types
 export interface Limit {
   id: string;
+  classId: string;
+  className: string;
   benefitId: string;
   benefitName: string;
   quantity: number;
+  unit: UnitType;
   interval: LimitInterval;
 }
 
 export interface LimitInterval {
-  type: 'per_visit' | 'per_year' | 'per_lifetime';
+  type: LimitIntervalType;
   value: number;
 }
 
 // Main Limit Structure interface
 export interface LimitStructure {
-  _id: string;
+  _id?: string;
   name: string;
   effectiveDate: string;
-  marketSegment: string;
-  productType: string;
+  marketSegment: MarketSegment;
+  productType: ProductType;
   benefitClassStructureId: string;
   benefitClassStructureName: string;
   limits: Limit[];
-  createdBy?: string;
-  createdAt?: string;
-  lastModifiedBy?: string;
-  lastModifiedAt?: string;
+  createdBy: string;
+  createdAt: Date;
+  lastModifiedBy: string;
+  lastModifiedAt: Date;
 }
 
 // Form types
 export interface LimitFormData {
   name: string;
   effectiveDate: string;
-  marketSegment: string;
-  productType: string;
+  marketSegment: MarketSegment;
+  productType: ProductType;
   benefitClassStructureId: string;
   benefitClassStructureName: string;
+  limits: Limit[];
 }
 
 // State types

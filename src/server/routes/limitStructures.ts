@@ -32,23 +32,24 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/limit-structures
 router.post('/', async (req: AuthRequest, res: Response) => {
-  console.log('POST /api/limit-structures called');
-  console.log('Request headers:', req.headers);
-  console.log('Request body:', req.body);
+  serverLogger.info('POST /api/limit-structures called', {
+    headers: req.headers,
+    body: req.body,
+  });
 
   try {
     if (!req.body) {
-      console.error('No request body received');
+      serverLogger.error('No request body received');
       return res.status(400).json({ error: 'No request body provided' });
     }
 
     const { limitConfig } = req.body;
     if (!limitConfig) {
-      console.error('No limitConfig in request body');
+      serverLogger.error('No limitConfig in request body');
       return res.status(400).json({ error: 'limitConfig is required in request body' });
     }
 
-    console.log('Creating new LimitStructure with config:', limitConfig);
+    serverLogger.info('Creating new LimitStructure', { config: limitConfig });
     // For development purposes, use a temporary user ID if authentication fails
     const tempUserId = 'temp-admin-user';
 
@@ -60,22 +61,22 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       lastModifiedAt: new Date(),
     });
 
-    console.log('Validating limit structure...');
+    serverLogger.info('Validating limit structure');
     try {
       await limitStructure.validate();
-      console.log('Validation successful');
+      serverLogger.info('Limit structure validation successful');
     } catch (validationError) {
-      console.error('Validation failed:', validationError);
+      serverLogger.error('Limit structure validation failed:', { error: validationError });
       return res.status(400).json({ error: 'Validation failed', details: validationError });
     }
 
-    console.log('Saving limit structure to database...');
+    serverLogger.info('Saving limit structure to database');
     const savedStructure = await limitStructure.save();
-    console.log('Successfully saved limit structure:', savedStructure);
+    serverLogger.info('Successfully saved limit structure:', { structure: savedStructure });
 
     res.status(201).json(savedStructure);
   } catch (error) {
-    console.error('Unexpected error in POST /api/limit-structures:', error);
+    serverLogger.error('Unexpected error in POST /api/limit-structures:', { error });
     serverLogger.error('Error creating limit structure:', error);
     res.status(500).json({ error: 'Failed to create limit structure', details: String(error) });
   }

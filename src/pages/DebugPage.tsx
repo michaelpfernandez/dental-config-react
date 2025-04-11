@@ -1,6 +1,7 @@
 import React from 'react';
-import { Container, Typography, Box } from '@mui/material';
+import { Container, Typography, Box, Divider } from '@mui/material';
 import FetchSavedStructures from '../components/benefit-classes/debug/FetchSavedStructures';
+import FetchSavedLimits from '../components/limits/debug/FetchSavedLimits';
 
 const DebugPage: React.FC = () => {
   return (
@@ -10,6 +11,8 @@ const DebugPage: React.FC = () => {
           Debug Page
         </Typography>
         <FetchSavedStructures />
+        <Divider sx={{ my: 4 }} />
+        <FetchSavedLimits />
       </Box>
     </Container>
   );
