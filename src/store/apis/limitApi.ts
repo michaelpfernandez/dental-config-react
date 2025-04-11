@@ -3,7 +3,16 @@ import { LimitStructure, LimitFormData } from '../../types/limitStructure';
 
 export const limitApi = createApi({
   reducerPath: 'limitApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: '/api',
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem('dental_user');
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
   tagTypes: ['LimitStructure'],
   endpoints: (builder) => ({
     getLimitStructures: builder.query<LimitStructure[], void>({
@@ -14,12 +23,24 @@ export const limitApi = createApi({
       query: (id) => `/limit-structures/${id}`,
       providesTags: (result, error, id) => [{ type: 'LimitStructure', id }],
     }),
-    createLimitStructure: builder.mutation<LimitStructure, LimitFormData>({
-      query: (limitData) => ({
-        url: '/limit-structures',
-        method: 'POST',
-        body: limitData,
-      }),
+    createLimitStructure: builder.mutation<LimitStructure, Partial<LimitStructure>>({
+      query: (limitData) => {
+        console.log('createLimitStructure mutation starting with data:', limitData);
+        return {
+          url: '/limit-structures',
+          method: 'POST',
+          body: limitData,
+        };
+      },
+      transformResponse: (response: any) => {
+        console.log('createLimitStructure API response:', response);
+        return response as LimitStructure;
+      },
+      transformErrorResponse: (error: any) => {
+        console.error('createLimitStructure API error:', error);
+        return error;
+      },
+
       invalidatesTags: ['LimitStructure'],
     }),
     updateLimitStructure: builder.mutation<
