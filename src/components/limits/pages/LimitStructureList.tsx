@@ -88,7 +88,6 @@ const LimitStructureList: React.FC = () => {
         setLimitStructures(mockLimitStructures);
       } catch (err) {
         setError('Failed to fetch limit structures');
-        console.error('Error fetching limit structures:', err);
       } finally {
         setIsLoading(false);
       }

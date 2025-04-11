@@ -19,7 +19,7 @@ const LimitStructurePage: React.FC = () => {
       await updateLimitStructure(updatedData).unwrap();
       navigate('/limits');
     } catch (error) {
-      console.error('Failed to update limit structure:', error);
+      // Error is already handled by the mutation error state
     }
   };
 

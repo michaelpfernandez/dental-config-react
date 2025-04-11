@@ -13,12 +13,10 @@ if (!loggingConfig.enabled) {
 export const clientLogger = {
   info: (message: string, data?: any) => {
     if (loggingConfig.clientLogging.apiCalls) {
-      console.log('[INFO]', message, data);
       log.info(message, data);
     }
   },
   error: (message: string, data?: any) => {
-    console.error('[ERROR]', message, data);
     log.error(message, data);
   },
 };
