@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Typography, Container, Box } from '@mui/material';
 import EditableSummaryCard, { PlanSummary } from '../card/EditableSummaryCard';
@@ -57,7 +57,7 @@ const BenefitClassSummary: React.FC = () => {
       id: string;
       name: string;
       benefits: Array<{ id: string; name: string }>;
-    }>,
+    }>
   ) => {
     setClassData(newClassData);
   };
@@ -76,7 +76,7 @@ const BenefitClassSummary: React.FC = () => {
   };
 
   // Handle saving the benefit class structure
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       setIsSaving(true);
       setError(null);
@@ -122,10 +122,10 @@ const BenefitClassSummary: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [planSummary, createBenefitClassStructure]);
 
   // Handle canceling changes
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     // Reset to original form data
     setPlanSummary({
       effectiveDate: formData.effectiveDate,
@@ -134,7 +134,7 @@ const BenefitClassSummary: React.FC = () => {
       productType: formData.productType,
       numberOfClasses: formData.numberOfClasses,
     });
-  };
+  }, [formData]);
 
   const handleSummaryUpdate = (updatedSummary: PlanSummary & { numberOfClasses: number }) => {
     setPlanSummary(updatedSummary);

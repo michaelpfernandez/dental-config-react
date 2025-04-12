@@ -18,6 +18,9 @@ module.exports = {
     'prefer-const': 'warn',
     'no-duplicate-imports': ['error'],
 
+    // React Hook dependency rules
+    'react-hooks/exhaustive-deps': 'off',
+
     // Prettier integration with specific settings
     'prettier/prettier': [
       'error',

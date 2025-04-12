@@ -317,11 +317,7 @@ const Limits: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={!isDirty}
-            >
+            <Button variant="contained" onClick={handleSave} disabled={!isDirty}>
               Save
             </Button>
           </Box>
