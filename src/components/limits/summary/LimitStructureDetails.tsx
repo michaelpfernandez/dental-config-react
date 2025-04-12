@@ -21,6 +21,7 @@ import { ConfirmationButtons } from '../../benefit-classes/common/ConfirmationBu
 import { LimitStructure, Limit } from '../../../types/limitStructure';
 import { LimitIntervalType } from '../../../types/enums';
 import { getDisplayName } from '../../../types/displayNames';
+import { MarketSegment } from '../../../types/enums';
 
 interface LimitStructureDetailsProps {
   limitStructure: LimitStructure;
@@ -35,7 +36,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
   const [isEditing, setIsEditing] = useState(false);
 
   const handleChange =
-    (field: keyof LimitStructure) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    (field: keyof LimitStructure) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setData((prev) => ({
         ...prev,
         [field]: event.target.value,
@@ -45,12 +46,20 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
   const handleLimitChange =
     (classId: string, benefitId: string) =>
     (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Limit) => {
+      const value = event.target.value;
+      
       setData((prev) => {
         const updatedLimits = prev.limits.map((limit) => {
           if (limit.classId === classId && limit.benefitId === benefitId) {
+            if (field === 'interval') {
+              return {
+                ...limit,
+                interval: { type: value as LimitIntervalType, value: limit.interval.value },
+              };
+            }
             return {
               ...limit,
-              [field]: event.target.value,
+              [field]: value,
             };
           }
           return limit;
@@ -100,25 +109,16 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth
-                label="Description"
-                value={data.description}
-                onChange={handleChange('description')}
-                disabled={!isEditing}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
                 select
                 fullWidth
-                label="Default Interval"
-                value={data.defaultInterval}
-                onChange={handleChange('defaultInterval')}
+                label="Market Segment"
+                value={data.marketSegment}
+                onChange={handleChange('marketSegment')}
                 disabled={!isEditing}
               >
-                {Object.values(LimitIntervalType).map((interval) => (
-                  <MenuItem key={interval} value={interval}>
-                    {getDisplayName.limitInterval(interval)}
+                {Object.values(MarketSegment).map((segment) => (
+                  <MenuItem key={segment} value={segment}>
+                    {getDisplayName.marketSegment(segment)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -160,7 +160,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                       <TextField
                         type="number"
                         value={limit.quantity}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleLimitChange(classId, limit.benefitId)(e, 'quantity')}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleLimitChange(classId, limit.benefitId)(event, 'quantity')}
                         disabled={!isEditing}
                         size="small"
                       />
@@ -169,7 +169,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                       <TextField
                         select
                         value={limit.interval.type}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleLimitChange(classId, limit.benefitId)(e, 'interval')}
+                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleLimitChange(classId, limit.benefitId)(event, 'interval')}
                         disabled={!isEditing}
                         size="small"
                       >

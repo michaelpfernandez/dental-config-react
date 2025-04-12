@@ -16,7 +16,15 @@ const LimitStructurePage: React.FC = () => {
 
   const handleSave = async (updatedData: typeof limitStructure) => {
     try {
-      await updateLimitStructure(updatedData).unwrap();
+      if (!updatedData) {
+        throw new Error('No data to update');
+      }
+
+      const updatePayload = {
+        id: id || '',
+        limitData: updatedData
+      };
+      await updateLimitStructure(updatePayload).unwrap();
       navigate('/limits');
     } catch (error) {
       // Error is already handled by the mutation error state

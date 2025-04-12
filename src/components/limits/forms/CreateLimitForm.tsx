@@ -30,6 +30,7 @@ const CreateLimitForm: React.FC = () => {
     productType: ProductType.PPO,
     benefitClassStructureId: '',
     benefitClassStructureName: '',
+    limits: [],
   });
 
   const [filteredClassStructures, setFilteredClassStructures] = useState<BenefitClassStructure[]>(
