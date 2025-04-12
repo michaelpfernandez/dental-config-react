@@ -17,6 +17,7 @@ import {
 import { LimitFormData } from '../../../types/limitStructure';
 import { BenefitClassStructure } from '../../../types/benefitClassStructure';
 import { useGetBenefitClassStructuresQuery } from '../../../store/apis/benefitClassApi';
+import { MarketSegment, ProductType } from '../../../types/enums';
 
 const CreateLimitForm: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -25,8 +26,8 @@ const CreateLimitForm: React.FC = () => {
   const [formData, setFormData] = useState<LimitFormData>({
     name: '',
     effectiveDate: defaultEffectiveDate,
-    marketSegment: '',
-    productType: '',
+    marketSegment: MarketSegment.Individual,
+    productType: ProductType.PPO,
     benefitClassStructureId: '',
     benefitClassStructureName: '',
   });
@@ -161,9 +162,9 @@ const CreateLimitForm: React.FC = () => {
                               label="Market Segment"
                               onChange={handleChange('marketSegment')}
                             >
-                              <MenuItem value="Small">Small Group</MenuItem>
-                              <MenuItem value="Individual">Individual</MenuItem>
-                              <MenuItem value="Large">Large Group</MenuItem>
+                              <MenuItem value={MarketSegment.Small}>Small Group</MenuItem>
+                              <MenuItem value={MarketSegment.Individual}>Individual</MenuItem>
+                              <MenuItem value={MarketSegment.Large}>Large Group</MenuItem>
                             </Select>
                           </FormControl>
                         </Grid>
@@ -175,8 +176,8 @@ const CreateLimitForm: React.FC = () => {
                               label="Product Type"
                               onChange={handleChange('productType')}
                             >
-                              <MenuItem value="PPO">PPO</MenuItem>
-                              <MenuItem value="DHMO">DHMO</MenuItem>
+                              <MenuItem value={ProductType.PPO}>PPO</MenuItem>
+                              <MenuItem value={ProductType.DHMO}>DHMO</MenuItem>
                             </Select>
                           </FormControl>
                         </Grid>

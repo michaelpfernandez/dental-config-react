@@ -18,7 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LimitStructure } from '../../../types/limitStructure';
-import { MarketSegment, ProductType, LimitIntervalType } from '../../../types/enums';
+import { MarketSegment, ProductType, LimitIntervalType, UnitType } from '../../../types/enums';
 
 const LimitStructureList: React.FC = () => {
   const navigate = useNavigate();
@@ -48,9 +48,12 @@ const LimitStructureList: React.FC = () => {
             limits: [
               {
                 id: 'limit-1',
+                classId: 'class-1',
+                className: 'Preventive Care Class',
                 benefitId: 'benefit-1',
                 benefitName: 'Preventive Care',
                 quantity: 2,
+                unit: UnitType.PerTooth,
                 interval: {
                   type: LimitIntervalType.PerYear,
                   value: 1,
@@ -59,6 +62,8 @@ const LimitStructureList: React.FC = () => {
             ],
             createdAt: new Date('2025-03-15T10:30:00Z'),
             lastModifiedAt: new Date('2025-03-15T10:30:00Z'),
+            createdBy: 'admin@example.com',
+            lastModifiedBy: 'admin@example.com',
           },
           {
             _id: 'limit-structure-2',
@@ -71,9 +76,12 @@ const LimitStructureList: React.FC = () => {
             limits: [
               {
                 id: 'limit-2',
+                classId: 'class-2',
+                className: 'Restorative Class',
                 benefitId: 'benefit-2',
                 benefitName: 'Basic Restorative',
                 quantity: 3,
+                unit: UnitType.PerItem,
                 interval: {
                   type: LimitIntervalType.PerYear,
                   value: 1,
@@ -82,6 +90,8 @@ const LimitStructureList: React.FC = () => {
             ],
             createdAt: new Date('2025-03-20T14:45:00Z'),
             lastModifiedAt: new Date('2025-03-20T14:45:00Z'),
+            createdBy: 'admin@example.com',
+            lastModifiedBy: 'admin@example.com',
           },
         ];
 
@@ -189,14 +199,14 @@ const LimitStructureList: React.FC = () => {
                         <IconButton
                           size="small"
                           color="primary"
-                          onClick={() => handleEdit(structure._id)}
+                          onClick={() => structure._id && handleEdit(structure._id)}
                         >
                           <EditIcon />
                         </IconButton>
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDelete(structure._id)}
+                          onClick={() => structure._id && handleDelete(structure._id)}
                         >
                           <DeleteIcon />
                         </IconButton>

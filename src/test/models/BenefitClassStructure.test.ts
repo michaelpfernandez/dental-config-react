@@ -1,6 +1,6 @@
 import { setupTestDB, cleanupTestDB } from '../setup';
-import { BenefitClassStructure, IBenefitClassStructure } from 'src/models/BenefitClassStructure';
-import { MarketSegment, ProductType } from 'src/models/DentalPlan';
+import { BenefitClassStructure, IBenefitClassStructure } from '../../models/BenefitClassStructure';
+import { MarketSegment, ProductType } from '../../models/DentalPlan';
 
 beforeAll(setupTestDB);
 afterAll(cleanupTestDB);

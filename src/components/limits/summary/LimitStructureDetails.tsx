@@ -44,7 +44,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
 
   const handleLimitChange =
     (classId: string, benefitId: string) =>
-    (event: React.ChangeEvent<HTMLInputElement>, field: keyof Limit) => {
+    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Limit) => {
       setData((prev) => {
         const updatedLimits = prev.limits.map((limit) => {
           if (limit.classId === classId && limit.benefitId === benefitId) {
@@ -131,7 +131,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
               Edit
             </Button>
           ) : (
-            <ConfirmationButtons onCancel={() => setIsEditing(false)} onConfirm={handleDone} />
+            <ConfirmationButtons onCancel={() => setIsEditing(false)} onDone={handleDone} />
           )}
         </CardActions>
       </Card>
@@ -160,7 +160,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                       <TextField
                         type="number"
                         value={limit.quantity}
-                        onChange={(e) => handleLimitChange(classId, limit.benefitId)(e, 'quantity')}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleLimitChange(classId, limit.benefitId)(e, 'quantity')}
                         disabled={!isEditing}
                         size="small"
                       />
@@ -169,7 +169,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                       <TextField
                         select
                         value={limit.interval.type}
-                        onChange={(e) => handleLimitChange(classId, limit.benefitId)(e, 'interval')}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleLimitChange(classId, limit.benefitId)(e, 'interval')}
                         disabled={!isEditing}
                         size="small"
                       >

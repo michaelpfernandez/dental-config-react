@@ -14,6 +14,7 @@ import {
 import { useCreateLimitStructureMutation } from '../../store/apis/limitApi';
 import { MarketSegment } from '../../types/enums';
 import { getDisplayName } from '../../types/displayNames';
+import { UnitType, LimitIntervalType } from '../../types/enums';
 
 interface LimitOption {
   value: number | string;
@@ -84,8 +85,8 @@ const Limits: React.FC = () => {
           benefitId: 'all',
           benefitName: 'All Benefits',
           quantity: limits.annualMax,
-          unit: 'N/A',
-          interval: { type: 'PerYear', value: 1 },
+          unit: UnitType.N_A,
+          interval: { type: LimitIntervalType.PerYear, value: 1 },
         },
       ],
     };

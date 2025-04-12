@@ -1,4 +1,4 @@
-import { MarketSegment, ProductType } from '../../../models/DentalPlan';
+import { MarketSegment, ProductType } from '../../models/DentalPlan';
 
 export interface MockLimitStructure {
   name: string;

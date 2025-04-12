@@ -4,14 +4,14 @@ import { Box, Button, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LimitStructureDetails from '../summary/LimitStructureDetails';
 import {
-  useGetLimitStructureQuery,
+  useGetLimitStructureByIdQuery,
   useUpdateLimitStructureMutation,
 } from '../../../store/apis/limitApi';
 
 const LimitStructurePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: limitStructure, isLoading, error } = useGetLimitStructureQuery(id || '');
+  const { data: limitStructure, isLoading, error } = useGetLimitStructureByIdQuery(id || '');
   const [updateLimitStructure] = useUpdateLimitStructureMutation();
 
   const handleSave = async (updatedData: typeof limitStructure) => {
