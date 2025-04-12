@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import connectToDatabase from '../config/database';
 import { serverLogger } from '../utils/serverLogger';
-import { authenticate } from './middleware/auth';
 import plansRouter from './routes/plans';
 import configRouter from './routes/config';
 import benefitClassStructuresRouter from './routes/benefitClassStructures';

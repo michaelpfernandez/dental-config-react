@@ -44,7 +44,7 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
   const filteredBenefits = benefits.filter(
     (benefit) =>
       benefit.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      benefit.id.toString().includes(searchQuery)
+      benefit.id.toString().includes(searchQuery),
   );
 
   const handleSelectBenefit = (benefit: Benefit) => {
@@ -177,7 +177,7 @@ const BenefitAssignmentDialog: React.FC<BenefitAssignmentDialogProps> = ({
                     onBenefitSelect(
                       selectedBenefits.includes(value)
                         ? selectedBenefits.filter((id) => id !== value)
-                        : [...selectedBenefits, value]
+                        : [...selectedBenefits, value],
                     );
                   }}
                 />

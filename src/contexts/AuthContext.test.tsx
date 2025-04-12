@@ -50,7 +50,7 @@ const renderWithRouter = (component: React.ReactNode) => {
   return render(
     <MemoryRouter>
       <AuthProvider>{component}</AuthProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 

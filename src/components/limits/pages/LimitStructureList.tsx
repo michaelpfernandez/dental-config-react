@@ -108,7 +108,7 @@ const LimitStructureList: React.FC = () => {
     // In a real app, you would call an API to delete
     // For now, we'll just filter the local state
     setLimitStructures((prevStructures) =>
-      prevStructures.filter((structure) => structure._id !== id)
+      prevStructures.filter((structure) => structure._id !== id),
     );
   };
 

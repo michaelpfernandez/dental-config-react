@@ -24,7 +24,7 @@ function AllTheProviders({ children, initialRoute = '/' }: WrapperProps) {
 
 const customRender = (
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'> & { initialRoute?: string }
+  options?: Omit<RenderOptions, 'wrapper'> & { initialRoute?: string },
 ) => {
   const { initialRoute, ...renderOptions } = options || {};
   return rtlRender(ui, {

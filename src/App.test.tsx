@@ -41,7 +41,7 @@ describe('App Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
     // Wait for auth state to update
     await new Promise((resolve) => setTimeout(resolve, 600));
@@ -97,7 +97,7 @@ describe('App Component', () => {
       renderApp('/unauthorized');
       expect(await screen.findByText(/access denied/i)).toBeInTheDocument();
       expect(
-        await screen.findByText(/you don't have permission to access this page/i)
+        await screen.findByText(/you don't have permission to access this page/i),
       ).toBeInTheDocument();
       expect(await screen.findByRole('button', { name: /return to home/i })).toBeInTheDocument();
     });

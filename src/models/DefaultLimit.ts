@@ -48,7 +48,7 @@ const DefaultLimitSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for efficient matching

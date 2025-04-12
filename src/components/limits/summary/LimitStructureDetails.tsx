@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { EditIcon } from '../../benefit-classes/common/icons';
 import { ConfirmationButtons } from '../../benefit-classes/common/ConfirmationButtons';
-import { LimitStructure, Limit, LimitInterval } from '../../../types/limitStructure';
+import { LimitStructure, Limit } from '../../../types/limitStructure';
 import { LimitIntervalType } from '../../../types/enums';
 import { getDisplayName } from '../../../types/displayNames';
 
@@ -77,7 +77,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
       acc[limit.classId].push(limit);
       return acc;
     },
-    {} as Record<string, Limit[]>
+    {} as Record<string, Limit[]>,
   );
 
   return (

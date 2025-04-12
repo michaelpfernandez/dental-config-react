@@ -14,7 +14,6 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { clientLogger } from '../../../utils/clientLogger';
 import { LimitFormData } from '../../../types/limitStructure';
 import { BenefitClassStructure } from '../../../types/benefitClassStructure';
 import { useGetBenefitClassStructuresQuery } from '../../../store/apis/benefitClassApi';
@@ -33,7 +32,7 @@ const CreateLimitForm: React.FC = () => {
   });
 
   const [filteredClassStructures, setFilteredClassStructures] = useState<BenefitClassStructure[]>(
-    []
+    [],
   );
 
   // Fetch benefit class structures from the API
@@ -50,7 +49,7 @@ const CreateLimitForm: React.FC = () => {
         (structure) =>
           (!formData.marketSegment || structure.marketSegment === formData.marketSegment) &&
           (!formData.productType || structure.productType === formData.productType) &&
-          (!formData.effectiveDate || structure.effectiveDate === formData.effectiveDate)
+          (!formData.effectiveDate || structure.effectiveDate === formData.effectiveDate),
       );
 
       setFilteredClassStructures(filtered);
@@ -72,7 +71,7 @@ const CreateLimitForm: React.FC = () => {
     // If selecting a benefit class structure, update the name as well
     if (field === 'benefitClassStructureId') {
       const selectedStructure = availableClassStructures.find(
-        (structure) => structure._id === value
+        (structure) => structure._id === value,
       );
       if (selectedStructure) {
         setFormData((prev) => ({

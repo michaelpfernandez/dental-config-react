@@ -27,7 +27,7 @@ describe('Header Component', () => {
           ,
           <Header onMenuSelect={mockOnMenuSelect} />
         </AuthProvider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
   };
 
@@ -49,7 +49,7 @@ describe('Header Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
 
     renderHeader();
@@ -72,7 +72,7 @@ describe('Header Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
 
     renderHeader();
@@ -97,7 +97,7 @@ describe('Header Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
 
     renderHeader();
@@ -123,7 +123,7 @@ describe('Header Component', () => {
         username: 'admin',
         fullName: 'John Doe',
         roleId: '1',
-      })
+      }),
     );
 
     renderHeader();
@@ -144,7 +144,7 @@ describe('Header Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
 
     renderHeader();
@@ -160,7 +160,7 @@ describe('Header Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
 
     renderHeader();
@@ -189,7 +189,7 @@ describe('Header Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
 
     renderHeader();

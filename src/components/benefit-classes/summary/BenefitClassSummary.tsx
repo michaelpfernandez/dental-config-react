@@ -57,7 +57,7 @@ const BenefitClassSummary: React.FC = () => {
       id: string;
       name: string;
       benefits: Array<{ id: string; name: string }>;
-    }>
+    }>,
   ) => {
     setClassData(newClassData);
   };

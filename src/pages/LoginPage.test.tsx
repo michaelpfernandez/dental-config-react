@@ -36,7 +36,7 @@ const renderLoginPage = () => {
       <AuthProvider>
         <LoginPage />
       </AuthProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 

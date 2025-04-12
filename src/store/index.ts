@@ -20,7 +20,7 @@ export const store = configureStore({
     getDefaultMiddleware().concat(
       benefitClassApi.middleware,
       benefitApi.middleware,
-      limitApi.middleware
+      limitApi.middleware,
     ),
 });
 

@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (userRole) {
           const userActionRights = authData.actionRights.filter((right) =>
-            userRole.actionRights.includes(right.id)
+            userRole.actionRights.includes(right.id),
           );
 
           return {
@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const user = authData.users.find(
-        (u) => u.username === credentials.username && u.password === credentials.password
+        (u) => u.username === credentials.username && u.password === credentials.password,
       );
 
       if (!user) {
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const userActionRights = authData.actionRights.filter((right) =>
-        userRole.actionRights.includes(right.id)
+        userRole.actionRights.includes(right.id),
       );
 
       const newAuthState = {
@@ -136,11 +136,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         authState.userActionRights.some((right) => right.id === actionRightId) ||
         // Or if user has the 'all' version of this right
         authState.userActionRights.some(
-          (right) => right.id === `${actionRightId.split('_')[0]}_all`
+          (right) => right.id === `${actionRightId.split('_')[0]}_all`,
         )
       );
     },
-    [authState]
+    [authState],
   );
 
   const contextValue = useMemo(
@@ -150,7 +150,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logout,
       hasActionRight,
     }),
-    [authState, login, logout, hasActionRight]
+    [authState, login, logout, hasActionRight],
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

@@ -23,7 +23,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor for handling errors
@@ -44,7 +44,7 @@ api.interceptors.response.use(
       message: errorMessage,
       originalError: error,
     });
-  }
+  },
 );
 
 // Generic GET request

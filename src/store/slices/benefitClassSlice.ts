@@ -54,7 +54,7 @@ const benefitClassSlice = createSlice({
     },
     addBenefitToClass: (
       state,
-      action: PayloadAction<{ classId: string; benefit: { id: string; name: string } }>
+      action: PayloadAction<{ classId: string; benefit: { id: string; name: string } }>,
     ) => {
       if (state.localStructure) {
         const { classId, benefit } = action.payload;
@@ -77,7 +77,7 @@ const benefitClassSlice = createSlice({
     },
     removeBenefitFromClass: (
       state,
-      action: PayloadAction<{ classId: string; benefitId: string }>
+      action: PayloadAction<{ classId: string; benefitId: string }>,
     ) => {
       if (state.localStructure) {
         const { classId, benefitId } = action.payload;

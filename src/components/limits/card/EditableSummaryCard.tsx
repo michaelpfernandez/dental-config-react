@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardActions, TextField, Button, Grid, Typography } from '@mui/material';
+import { Card, CardContent, CardActions, TextField, Button, Grid } from '@mui/material';
 import { EditIcon } from '../../benefit-classes/common/icons';
 import { ConfirmationButtons } from '../../benefit-classes/common/ConfirmationButtons';
 import { LimitFormData } from '../../../types/limitStructure';

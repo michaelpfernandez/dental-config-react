@@ -121,7 +121,7 @@ describe('MongoConnection', () => {
     it('should throw error when not connected', async () => {
       await connection.disconnect();
       await expect(() => connection.getConnection()).toThrow(
-        'MongoDB connection is not established'
+        'MongoDB connection is not established',
       );
     });
   });

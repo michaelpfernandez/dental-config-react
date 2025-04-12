@@ -40,7 +40,7 @@ describe('HomePage Component', () => {
             <HomePage />
           </AppLayout>
         </AuthProvider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
   };
 
@@ -57,7 +57,7 @@ describe('HomePage Component', () => {
   it('renders the initial content area with instructions', () => {
     renderHomePage();
     expect(
-      screen.getByText(/please use the menu above to manage your dental plans/i)
+      screen.getByText(/please use the menu above to manage your dental plans/i),
     ).toBeInTheDocument();
   });
 
@@ -69,7 +69,7 @@ describe('HomePage Component', () => {
         username: 'admin',
         fullName: 'Admin User',
         roleId: '1',
-      })
+      }),
     );
 
     renderHomePage();

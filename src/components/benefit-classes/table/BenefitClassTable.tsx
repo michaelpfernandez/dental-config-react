@@ -30,7 +30,7 @@ export interface Benefit {
 export interface BenefitClassTableProps {
   numberOfClasses: number;
   onClassDataChange?: (
-    classData: Array<{ id: string; name: string; benefits: Array<{ id: string; name: string }> }>
+    classData: Array<{ id: string; name: string; benefits: Array<{ id: string; name: string }> }>,
   ) => void;
 }
 

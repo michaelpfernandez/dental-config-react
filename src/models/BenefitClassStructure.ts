@@ -73,7 +73,7 @@ const BenefitClassStructureSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Add validation to ensure class names are unique
@@ -83,7 +83,7 @@ BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]
 
   // Find duplicates
   const duplicates = classNames.filter(
-    (name: string, index: number) => classNames.indexOf(name) !== index
+    (name: string, index: number) => classNames.indexOf(name) !== index,
   );
 
   if (classNames.length !== uniqueClassNames.size) {
@@ -102,7 +102,7 @@ BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]
     for (const benefit of cls.benefits) {
       if (benefitIds.has(benefit.id)) {
         throw new Error(
-          `Benefit ${benefit.id} is already assigned to class ${benefitIds.get(benefit.id)}`
+          `Benefit ${benefit.id} is already assigned to class ${benefitIds.get(benefit.id)}`,
         );
       }
       benefitIds.set(benefit.id, cls.name);
@@ -114,5 +114,5 @@ BenefitClassStructureSchema.path('classes').validate(function (classes: IClass[]
 
 export const BenefitClassStructure = mongoose.model<IBenefitClassStructure>(
   'BenefitClassStructure',
-  BenefitClassStructureSchema
+  BenefitClassStructureSchema,
 );

@@ -91,11 +91,11 @@ const limitStructureSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Create and export the model
 export const LimitStructure = mongoose.model<ILimitStructure>(
   'LimitStructure',
-  limitStructureSchema
+  limitStructureSchema,
 );

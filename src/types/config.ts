@@ -78,7 +78,7 @@ export const validateBenefitClass = (config: BenefitClassConfig): boolean => {
       typeof bc.description === 'string' &&
       typeof bc.defaultCostShare === 'number' &&
       bc.defaultCostShare >= 0 &&
-      bc.defaultCostShare <= 100
+      bc.defaultCostShare <= 100,
   );
 };
 
@@ -94,16 +94,16 @@ export const validateBenefits = (config: BenefitsByClass): boolean => {
           (limit) =>
             typeof limit.quantity === 'number' &&
             typeof limit.unit === 'string' &&
-            typeof limit.period === 'string'
-        )
-    )
+            typeof limit.period === 'string',
+        ),
+    ),
   );
 };
 
 // Helper function to load and validate configs
 export const loadConfig = async <T>(
   path: string,
-  validator: (config: T) => boolean
+  validator: (config: T) => boolean,
 ): Promise<T> => {
   try {
     const config = await import(path);

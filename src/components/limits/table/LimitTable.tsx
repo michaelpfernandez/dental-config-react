@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -13,7 +13,7 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
-import { Limit, LimitInterval } from '../../../types/limitStructure';
+import { Limit } from '../../../types/limitStructure';
 import { useGetBenefitClassStructureByIdQuery } from '../../../store/apis/benefitClassApi';
 import { UnitType, LimitIntervalType } from '../../../types/enums';
 
@@ -40,7 +40,7 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
           quantity: 0,
           interval: { type: LimitIntervalType.PerYear, value: 1 },
           unit: UnitType.N_A,
-        }))
+        })),
       );
       setLimits(initialLimits);
       if (JSON.stringify(initialLimits) !== JSON.stringify(limits)) {
@@ -51,23 +51,10 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
 
   const handleLimitChange = (limitId: string, field: keyof Limit, value: any) => {
     const newLimits = limits.map((limit) =>
-      limit.id === limitId ? { ...limit, [field]: value } : limit
+      limit.id === limitId ? { ...limit, [field]: value } : limit,
     );
     setLimits(newLimits);
     onLimitDataChange(newLimits);
-  };
-
-  const formatIntervalType = (type: LimitIntervalType): string => {
-    switch (type) {
-      case LimitIntervalType.PerVisit:
-        return 'Per Visit';
-      case LimitIntervalType.PerYear:
-        return 'Per Year';
-      case LimitIntervalType.PerLifetime:
-        return 'Per Lifetime';
-      default:
-        return type;
-    }
   };
 
   if (isLoading) {
@@ -90,7 +77,7 @@ const LimitTable: React.FC<LimitTableProps> = ({ limitStructureId, onLimitDataCh
       acc[limit.classId].push(limit);
       return acc;
     },
-    {} as Record<string, Limit[]>
+    {} as Record<string, Limit[]>,
   );
 
   return (

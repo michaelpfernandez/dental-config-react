@@ -52,13 +52,13 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       serverLogger.info(`Number of classes in payload: ${classConfig.classes.length}`);
       classConfig.classes.forEach((classItem: any, index: number) => {
         serverLogger.info(
-          `Class ${index + 1}: ${classItem.name} (ID: ${classItem.id}, type: ${typeof classItem.id})`
+          `Class ${index + 1}: ${classItem.name} (ID: ${classItem.id}, type: ${typeof classItem.id})`,
         );
         if (classItem.benefits && Array.isArray(classItem.benefits)) {
           serverLogger.info(`  Benefits count: ${classItem.benefits.length}`);
           classItem.benefits.forEach((benefit: any, bIndex: number) => {
             serverLogger.info(
-              `  Benefit ${bIndex + 1}: ${benefit.name} (ID: ${benefit.id}, type: ${typeof benefit.id})`
+              `  Benefit ${bIndex + 1}: ${benefit.name} (ID: ${benefit.id}, type: ${typeof benefit.id})`,
             );
           });
         } else {
@@ -192,7 +192,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
           lastModifiedAt: new Date(),
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!structure) {

@@ -200,7 +200,7 @@ const DentalPlanSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for efficient querying
