@@ -31,7 +31,7 @@ export interface Benefit {
 export interface BenefitClassTableProps {
   numberOfClasses: number;
   onClassDataChange?: (
-    classData: Array<{ id: string; name: string; benefits: Array<{ id: string; name: string }> }>,
+    classData: Array<{ id: string; name: string; benefits: Array<{ id: string; name: string }> }>
   ) => void;
 }
 
@@ -66,28 +66,43 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({
 
   // Helper function to get the current class data
   const getClassData = () => {
-    const classData: Array<{
-      id: string;
-      name: string;
-      benefits: Array<{ id: string; name: string }>;
-    }> = [];
+    console.log('[BenefitClassTable] Getting class data...');
+    console.log('[BenefitClassTable] Current selected classes:', selectedClasses);
+    console.log('[BenefitClassTable] Current class benefits:', classBenefits);
 
-    for (let i = 0; i < numberOfClasses; i++) {
-      const classId = selectedClasses.get(i) || '';
-      const className = availableClasses.find((c) => c.id === classId)?.name || `Class ${i + 1}`;
+    const classData = Array.from({ length: numberOfClasses }).map((_, i) => {
+      const classIndex = i + 1;
+      const selectedClassId = selectedClasses.get(i);
       const benefitIds = classBenefits.get(i) || [];
 
-      const benefitsForClass = benefits
-        .filter((benefit) => benefitIds.includes(String(benefit.id)))
-        .map((benefit) => ({ id: String(benefit.id), name: benefit.name }));
+      // Find the selected class in available classes if one is selected
+      const selectedClass = selectedClassId
+        ? availableClasses.find((c) => String(c.id) === String(selectedClassId))
+        : null;
 
-      classData.push({
-        id: classId || `class-${i + 1}`,
-        name: className,
+      // Map the benefits for this class
+      const benefitsForClass = benefitIds
+        .map((benefitId) => {
+          const benefit = benefits.find((b) => String(b.id) === String(benefitId));
+          return benefit
+            ? {
+                id: String(benefit.id),
+                name: benefit.name,
+              }
+            : null;
+        })
+        .filter((b): b is { id: string; name: string } => b !== null);
+
+      return {
+        // Always use sequential IDs
+        id: String(classIndex),
+        // Use selected class name if available, otherwise default
+        name: selectedClass?.name || `Class ${classIndex}`,
         benefits: benefitsForClass,
-      });
-    }
+      };
+    });
 
+    console.log('[BenefitClassTable] Generated class data:', classData);
     return classData;
   };
 
@@ -97,7 +112,10 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({
       const newMap = new Map(classBenefits);
       newMap.set(selectedRow, [...selectedBenefits]);
 
-      clientLogger.info('Saving benefits for row:', { row: selectedRow, benefits: selectedBenefits });
+      clientLogger.info('Saving benefits for row:', {
+        row: selectedRow,
+        benefits: selectedBenefits,
+      });
 
       // Update state
       setClassBenefits(newMap);
