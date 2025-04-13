@@ -6,6 +6,7 @@ import BenefitClassTable from '../table/BenefitClassTable';
 import { SaveButtons } from '../common/SaveButtons';
 import { useActionBar } from '../../../context/ActionBarContext';
 import { useCreateBenefitClassStructureMutation } from '../../../store/apis/benefitClassApi';
+import { clientLogger } from '../../../utils/clientLogger';
 
 const BenefitClassSummary: React.FC = () => {
   const location = useLocation();
@@ -32,24 +33,10 @@ const BenefitClassSummary: React.FC = () => {
   const [createBenefitClassStructure, { isLoading: isCreating }] =
     useCreateBenefitClassStructureMutation();
 
+  // Effect for handling save button state
   useEffect(() => {
-    setLoading(false);
-    setError(null);
-
-    // Update isSaving when mutation state changes
     setIsSaving(isCreating);
-
-    // Set up the action bar buttons when the component mounts
-    setActions([
-      {
-        id: 'save-button',
-        component: <SaveButtons onSave={handleSave} onCancel={handleCancel} isSaving={isSaving} />,
-      },
-    ]);
-
-    // Clear actions when component unmounts
-    return () => clearActions();
-  }, [setActions, clearActions, isCreating, planSummary]);
+  }, [isCreating]);
 
   // Function to handle class data changes from BenefitClassTable
   const handleClassDataChange = (
@@ -57,8 +44,9 @@ const BenefitClassSummary: React.FC = () => {
       id: string;
       name: string;
       benefits: Array<{ id: string; name: string }>;
-    }>
+    }>,
   ) => {
+    clientLogger.info('Received class data from table:', newClassData);
     setClassData(newClassData);
   };
 
@@ -77,6 +65,7 @@ const BenefitClassSummary: React.FC = () => {
 
   // Handle saving the benefit class structure
   const handleSave = useCallback(async () => {
+    clientLogger.info('Current class data before save:', classData);
     try {
       setIsSaving(true);
       setError(null);
@@ -97,9 +86,11 @@ const BenefitClassSummary: React.FC = () => {
 
       // Prepare the payload
       const payload = preparePayload();
+      clientLogger.info('Sending payload to create benefit class structure:', payload);
 
       // Call the API to create a new benefit class structure
-      await createBenefitClassStructure(payload).unwrap();
+      const result = await createBenefitClassStructure(payload).unwrap();
+      clientLogger.info('Received response from create benefit class structure:', result);
 
       // Show success message or redirect
       alert('Benefit class structure saved successfully!');
@@ -139,6 +130,23 @@ const BenefitClassSummary: React.FC = () => {
   const handleSummaryUpdate = (updatedSummary: PlanSummary & { numberOfClasses: number }) => {
     setPlanSummary(updatedSummary);
   };
+
+  // Effect for setting up action bar buttons
+  useEffect(() => {
+    setLoading(false);
+    setError(null);
+
+    // Set up the action bar buttons when the component mounts
+    setActions([
+      {
+        id: 'save-button',
+        component: <SaveButtons onSave={handleSave} onCancel={handleCancel} isSaving={isSaving} />,
+      },
+    ]);
+
+    // Clear actions when component unmounts
+    return () => clearActions();
+  }, [setActions, clearActions, handleSave, handleCancel, isSaving]);
 
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;

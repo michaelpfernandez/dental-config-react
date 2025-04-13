@@ -16,6 +16,7 @@ import {
 import { EditIcon } from '../common/icons';
 import { fetchBenefitClasses, fetchBenefitsList } from '../../../services/api';
 import BenefitAssignmentDialog from '../dialogs/BenefitAssignmentDialog';
+import { clientLogger } from '../../../utils/clientLogger';
 
 export interface BenefitClass {
   id: string;
@@ -96,29 +97,15 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({
       const newMap = new Map(classBenefits);
       newMap.set(selectedRow, [...selectedBenefits]);
 
+      clientLogger.info('Saving benefits for row:', { row: selectedRow, benefits: selectedBenefits });
+
       // Update state
       setClassBenefits(newMap);
 
       // Notify parent component using new Map directly
       if (onClassDataChange) {
-        const classData = [];
-        for (let i = 0; i < numberOfClasses; i++) {
-          const classId = selectedClasses.get(i) || '';
-          const className =
-            availableClasses.find((c) => c.id === classId)?.name || `Class ${i + 1}`;
-          const benefitIds = i === selectedRow ? selectedBenefits : newMap.get(i) || [];
-
-          const benefitsForClass = benefits
-            .filter((benefit) => benefitIds.includes(String(benefit.id)))
-            .map((benefit) => ({ id: String(benefit.id), name: benefit.name }));
-
-          classData.push({
-            id: classId || `class-${i + 1}`,
-            name: className,
-            benefits: benefitsForClass,
-          });
-        }
-
+        const classData = getClassData();
+        clientLogger.info('Notifying parent with class data:', classData);
         onClassDataChange(classData);
       }
     }
@@ -137,9 +124,10 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({
     const loadBenefits = async () => {
       try {
         const fetchedBenefits = await fetchBenefitsList();
+        clientLogger.info('Fetched benefits:', fetchedBenefits);
         setBenefits(fetchedBenefits.benefits);
       } catch (error) {
-        // clientLogger.info('Error fetching benefits:', error);
+        clientLogger.error('Error fetching benefits:', error);
       }
     };
 
@@ -150,14 +138,23 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({
     const loadBenefitClasses = async () => {
       try {
         const fetchedClasses = await fetchBenefitClasses();
+        clientLogger.info('Fetched benefit classes:', fetchedClasses);
         setAvailableClasses(fetchedClasses.benefitClasses);
       } catch (error) {
-        // clientLogger.info('Error fetching benefit classes:', error);
+        clientLogger.error('Error fetching benefit classes:', error);
       }
     };
 
     loadBenefitClasses();
   }, []);
+
+  useEffect(() => {
+    // Notify parent component of changes when number of classes changes
+    if (onClassDataChange) {
+      const classData = getClassData();
+      onClassDataChange(classData);
+    }
+  }, [numberOfClasses]);
 
   // Keep track of previous state to preserve benefits when number of classes changes
   const prevClassBenefits = useRef(classBenefits);
