@@ -24,7 +24,7 @@ export const limitApi = createApi({
       query: (id) => `/limit-structures/${id}`,
       providesTags: (result, error, id) => [{ type: 'LimitStructure', id }],
     }),
-    createLimitStructure: builder.mutation<LimitStructure, Partial<LimitStructure>>({
+    createLimitStructure: builder.mutation<LimitStructure, { limitConfig: Partial<LimitStructure> }>({
       query: (limitData) => {
         clientLogger.info('Starting createLimitStructure mutation:', { data: limitData });
         return {

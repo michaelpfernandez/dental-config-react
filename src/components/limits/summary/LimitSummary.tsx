@@ -66,6 +66,7 @@ const LimitSummary: React.FC = () => {
     });
 
     const currentTime = new Date();
+    const currentUser = 'current_user'; // This should be replaced with actual user info
 
     return {
       limitConfig: {
@@ -85,9 +86,11 @@ const LimitSummary: React.FC = () => {
           unit: limit.unit,
           interval: limit.interval,
         })),
+        createdBy: currentUser,
         createdAt: currentTime,
+        lastModifiedBy: currentUser,
         lastModifiedAt: currentTime,
-      },
+      }
     };
   };
 
@@ -119,8 +122,8 @@ const LimitSummary: React.FC = () => {
       const payload = preparePayload();
       clientLogger.info('Saving with payload:', { payload });
 
-      // Call the API
-      const result = await createLimit(payload).unwrap();
+      // Call the API with the limitConfig object
+      const result = await createLimit({ limitConfig: payload.limitConfig }).unwrap();
       clientLogger.info('Save successful:', { result });
 
       // Update UI state

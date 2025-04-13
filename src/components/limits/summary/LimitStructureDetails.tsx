@@ -15,6 +15,9 @@ import {
   TableHead,
   TableRow,
   MenuItem,
+  Select,
+  Input,
+  SelectChangeEvent,
 } from '@mui/material';
 import { EditIcon } from '../../benefit-classes/common/icons';
 import { ConfirmationButtons } from '../../benefit-classes/common/ConfirmationButtons';
@@ -35,7 +38,7 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
   const [data, setData] = useState<LimitStructure>(limitStructure);
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleChange =
+  const handleTextFieldChange =
     (field: keyof LimitStructure) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setData((prev) => ({
         ...prev,
@@ -43,9 +46,46 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
       }));
     };
 
-  const handleLimitChange =
-    (classId: string, benefitId: string) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Limit) => {
+  const handleSelectChange =
+    (field: keyof LimitStructure) => (event: SelectChangeEvent) => {
+      setData((prev) => ({
+        ...prev,
+        [field]: event.target.value,
+      }));
+    };
+
+  const handleLimitTextFieldChange =
+    (classId: string, benefitId: string, field: keyof Limit) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const value = event.target.value;
+      
+      setData((prev) => {
+        const updatedLimits = prev.limits.map((limit) => {
+          if (limit.classId === classId && limit.benefitId === benefitId) {
+            if (field === 'interval') {
+              return {
+                ...limit,
+                interval: { type: value as LimitIntervalType, value: limit.interval.value },
+              };
+            }
+            return {
+              ...limit,
+              [field]: value,
+            };
+          }
+          return limit;
+        });
+
+        return {
+          ...prev,
+          limits: updatedLimits,
+        };
+      });
+    };
+
+  const handleLimitSelectChange =
+    (classId: string, benefitId: string, field: keyof Limit) =>
+    (event: SelectChangeEvent) => {
       const value = event.target.value;
       
       setData((prev) => {
@@ -103,25 +143,25 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                 fullWidth
                 label="Name"
                 value={data.name}
-                onChange={handleChange('name')}
+                onChange={handleTextFieldChange('name')}
                 disabled={!isEditing}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                select
+              <Select
                 fullWidth
                 label="Market Segment"
                 value={data.marketSegment}
-                onChange={handleChange('marketSegment')}
+                onChange={handleSelectChange('marketSegment')}
                 disabled={!isEditing}
+                input={<Input />}
               >
                 {Object.values(MarketSegment).map((segment) => (
                   <MenuItem key={segment} value={segment}>
                     {getDisplayName.marketSegment(segment)}
                   </MenuItem>
                 ))}
-              </TextField>
+              </Select>
             </Grid>
           </Grid>
         </CardContent>
@@ -160,25 +200,25 @@ const LimitStructureDetails: React.FC<LimitStructureDetailsProps> = ({
                       <TextField
                         type="number"
                         value={limit.quantity}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleLimitChange(classId, limit.benefitId)(event, 'quantity')}
+                        onChange={handleLimitTextFieldChange(classId, limit.benefitId, 'quantity')}
                         disabled={!isEditing}
                         size="small"
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField
-                        select
+                      <Select
                         value={limit.interval.type}
-                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleLimitChange(classId, limit.benefitId)(event, 'interval')}
+                        onChange={handleLimitSelectChange(classId, limit.benefitId, 'interval')}
                         disabled={!isEditing}
                         size="small"
+                        input={<Input />}
                       >
                         {Object.values(LimitIntervalType).map((interval) => (
                           <MenuItem key={interval} value={interval}>
                             {getDisplayName.limitInterval(interval)}
                           </MenuItem>
                         ))}
-                      </TextField>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}

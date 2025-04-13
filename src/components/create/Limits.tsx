@@ -117,7 +117,14 @@ const Limits: React.FC = () => {
       const payload = preparePayload();
 
       // Call the API
-      const result = await createLimit(payload).unwrap();
+      const result = await createLimit({
+        limitConfig: {
+          name: payload.name,
+          effectiveDate: payload.effectiveDate,
+          marketSegment: payload.marketSegment,
+          limits: payload.limits,
+        },
+      }).unwrap();
       if (result) {
         setIsDirty(false);
         setError(null);
