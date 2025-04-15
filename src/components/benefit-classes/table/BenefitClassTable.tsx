@@ -117,13 +117,45 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({
         benefits: selectedBenefits,
       });
 
+      // Generate class data using the updated benefits map directly
+      // This ensures the latest benefits are included without waiting for state update
+      const classData = Array.from({ length: numberOfClasses }).map((_, i) => {
+        const classIndex = i + 1;
+        const selectedClassId = selectedClasses.get(i);
+        // Use the updated map for benefits
+        const benefitIds = i === selectedRow ? selectedBenefits : newMap.get(i) || [];
+
+        // Find the selected class in available classes if one is selected
+        const selectedClass = selectedClassId
+          ? availableClasses.find((c) => String(c.id) === String(selectedClassId))
+          : null;
+
+        // Map the benefits for this class
+        const benefitsForClass = benefitIds
+          .map((benefitId) => {
+            const benefit = benefits.find((b) => String(b.id) === String(benefitId));
+            return benefit
+              ? {
+                  id: String(benefit.id),
+                  name: benefit.name,
+                }
+              : null;
+          })
+          .filter((b): b is { id: string; name: string } => b !== null);
+
+        return {
+          id: String(classIndex),
+          name: selectedClass?.name || `Class ${classIndex}`,
+          benefits: benefitsForClass,
+        };
+      });
+
       // Update state
       setClassBenefits(newMap);
 
-      // Notify parent component using new Map directly
+      // Notify parent component with the directly calculated class data
       if (onClassDataChange) {
-        const classData = getClassData();
-        clientLogger.info('Notifying parent with class data:', classData);
+        clientLogger.info('Notifying parent with updated class data:', classData);
         onClassDataChange(classData);
       }
     }
@@ -170,9 +202,10 @@ const BenefitClassTable: React.FC<BenefitClassTableProps> = ({
     // Notify parent component of changes when number of classes changes
     if (onClassDataChange) {
       const classData = getClassData();
+      clientLogger.info('Number of classes changed, notifying parent with class data:', classData);
       onClassDataChange(classData);
     }
-  }, [numberOfClasses]);
+  }, [numberOfClasses, benefits, availableClasses]);
 
   // Keep track of previous state to preserve benefits when number of classes changes
   const prevClassBenefits = useRef(classBenefits);

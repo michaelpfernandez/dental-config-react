@@ -26,6 +26,22 @@ const BenefitClassSummary: React.FC = () => {
     Array<{ id: string; name: string; benefits: Array<{ id: string; name: string }> }>
   >([]);
 
+  // Initialize class data only when component mounts
+  useEffect(() => {
+    // Only initialize if classData is empty
+    if (classData.length === 0) {
+      // Create default class data based on number of classes
+      const initialClassData = Array.from({ length: planSummary.numberOfClasses }).map((_, i) => ({
+        id: String(i + 1),
+        name: `Class ${i + 1}`,
+        benefits: [],
+      }));
+
+      clientLogger.info('Initializing class data:', initialClassData);
+      setClassData(initialClassData);
+    }
+  }, []); // Only run once on mount
+
   // Get the action bar context
   const { setActions, clearActions } = useActionBar();
 
@@ -44,14 +60,20 @@ const BenefitClassSummary: React.FC = () => {
       id: string;
       name: string;
       benefits: Array<{ id: string; name: string }>;
-    }>,
+    }>
   ) => {
     clientLogger.info('Received class data from table:', newClassData);
-    setClassData(newClassData);
+    // Make a deep copy to ensure state updates correctly
+    const dataCopy = JSON.parse(JSON.stringify(newClassData));
+    clientLogger.info('Setting class data with copy:', dataCopy);
+    setClassData(dataCopy);
   };
 
   // Function to transform component state into API payload format
   const preparePayload = () => {
+    // Log the current state of classData before creating payload
+    clientLogger.info('Class data when preparing payload:', classData);
+
     const payload = {
       name: planSummary.className,
       effectiveDate: planSummary.effectiveDate,
@@ -60,12 +82,30 @@ const BenefitClassSummary: React.FC = () => {
       numberOfClasses: planSummary.numberOfClasses,
       classes: classData,
     };
+
+    // Double check that classes array is not empty
+    if (!payload.classes || payload.classes.length === 0) {
+      clientLogger.info('Warning: Classes array is empty in payload! Attempting to fix...');
+      // Try to get class data directly from the current state
+      payload.classes = Array.from({ length: planSummary.numberOfClasses }).map((_, i) => ({
+        id: String(i + 1),
+        name: `Class ${i + 1}`,
+        benefits: [],
+      }));
+    }
+
     return payload;
   };
 
   // Handle saving the benefit class structure
   const handleSave = useCallback(async () => {
+    // Get the latest class data directly from state
     clientLogger.info('Current class data before save:', classData);
+    if (classData.length === 0) {
+      clientLogger.info(
+        'Warning: Class data is empty! This may indicate a state management issue.'
+      );
+    }
     try {
       setIsSaving(true);
       setError(null);
@@ -113,7 +153,7 @@ const BenefitClassSummary: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [planSummary, createBenefitClassStructure]);
+  }, [planSummary, createBenefitClassStructure, classData]);
 
   // Handle canceling changes
   const handleCancel = useCallback(() => {
@@ -130,6 +170,31 @@ const BenefitClassSummary: React.FC = () => {
   const handleSummaryUpdate = (updatedSummary: PlanSummary & { numberOfClasses: number }) => {
     setPlanSummary(updatedSummary);
   };
+
+  // Update class data when number of classes changes
+  useEffect(() => {
+    // Preserve existing class data when possible
+    if (classData.length !== planSummary.numberOfClasses) {
+      clientLogger.info('Number of classes changed, updating class data structure');
+
+      // Create new class data array with the new length
+      const newClassData = Array.from({ length: planSummary.numberOfClasses }).map((_, i) => {
+        // Reuse existing class data if available
+        if (i < classData.length) {
+          return classData[i];
+        }
+        // Create new class data for additional classes
+        return {
+          id: String(i + 1),
+          name: `Class ${i + 1}`,
+          benefits: [],
+        };
+      });
+
+      clientLogger.info('Updated class data:', newClassData);
+      setClassData(newClassData);
+    }
+  }, [planSummary.numberOfClasses]);
 
   // Effect for setting up action bar buttons
   useEffect(() => {
