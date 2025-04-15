@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { clientLogger } from '../../utils/clientLogger';
 import {
   Box,
@@ -13,9 +13,22 @@ import {
   Switch,
   FormControlLabel,
   Button,
+  TextField,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { format } from 'date-fns';
+import { useGetBenefitClassStructuresQuery } from '../../store/apis/benefitClassApi';
+import { useGetLimitStructuresQuery } from '../../store/apis/limitApi';
 
 interface PlanAttributes {
+  name: string;
+  effectiveDate: Date | null;
+  classStructureId: string;
+  limitStructureId: string;
   marketSegment: string;
   productType: string;
   coverageType: string;
@@ -24,7 +37,11 @@ interface PlanAttributes {
 }
 
 const Plans: React.FC = () => {
-  const [attributes, setAttributes] = React.useState<PlanAttributes>({
+  const [attributes, setAttributes] = useState<PlanAttributes>({
+    name: '',
+    effectiveDate: new Date(),
+    classStructureId: '',
+    limitStructureId: '',
     marketSegment: 'Small',
     productType: 'PPO',
     coverageType: 'Both',
@@ -32,12 +49,89 @@ const Plans: React.FC = () => {
     oonCoverage: true,
   });
 
+  // Fetch benefit class structures and limit structures
+  const {
+    data: classStructures,
+    isLoading: isLoadingClassStructures,
+    error: classStructuresError,
+  } = useGetBenefitClassStructuresQuery();
+
+  const {
+    data: limitStructures,
+    isLoading: isLoadingLimitStructures,
+    error: limitStructuresError,
+  } = useGetLimitStructuresQuery();
+
   const handleChange = (field: keyof PlanAttributes) => (event: any) => {
     setAttributes((prev) => ({
       ...prev,
       [field]: event.target.value,
     }));
   };
+
+  const handleDateChange = (date: Date | null) => {
+    setAttributes((prev) => ({
+      ...prev,
+      effectiveDate: date,
+    }));
+  };
+
+  // Filter class structures based on effective date, market segment, and product type
+  const filteredClassStructures = classStructures?.filter((structure) => {
+    if (!attributes.effectiveDate) return false;
+
+    const structureDate = new Date(structure.effectiveDate);
+    const selectedDate = new Date(attributes.effectiveDate);
+
+    // Format dates to compare only year, month, day
+    const structureDateStr = format(structureDate, 'yyyy-MM-dd');
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+
+    return (
+      structureDateStr === selectedDateStr &&
+      (attributes.marketSegment === '' || structure.marketSegment === attributes.marketSegment) &&
+      (attributes.productType === '' || structure.productType === attributes.productType)
+    );
+  });
+
+  // Filter limit structures based on selected class structure
+  const filteredLimitStructures = limitStructures?.filter((structure) => {
+    if (!attributes.classStructureId) return false;
+
+    const selectedClassStructure = classStructures?.find(
+      (cs) => cs._id === attributes.classStructureId
+    );
+    if (!selectedClassStructure) return false;
+
+    const structureDate = new Date(structure.effectiveDate);
+    const selectedDate = new Date(selectedClassStructure.effectiveDate);
+
+    // Format dates to compare only year, month, day
+    const structureDateStr = format(structureDate, 'yyyy-MM-dd');
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+
+    return (
+      structureDateStr === selectedDateStr &&
+      structure.marketSegment === selectedClassStructure.marketSegment &&
+      structure.productType === selectedClassStructure.productType
+    );
+  });
+
+  // Reset dependent fields when parent fields change
+  useEffect(() => {
+    setAttributes((prev) => ({
+      ...prev,
+      classStructureId: '',
+      limitStructureId: '',
+    }));
+  }, [attributes.effectiveDate, attributes.marketSegment, attributes.productType]);
+
+  useEffect(() => {
+    setAttributes((prev) => ({
+      ...prev,
+      limitStructureId: '',
+    }));
+  }, [attributes.classStructureId]);
 
   const handleSwitchChange =
     (field: keyof PlanAttributes) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +147,106 @@ const Plans: React.FC = () => {
         Plan Configuration
       </Typography>
       <Grid container spacing={3}>
+        {/* Plan Details */}
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Plan Details
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Plan Name"
+                    value={attributes.name}
+                    onChange={(e) => setAttributes((prev) => ({ ...prev, name: e.target.value }))}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      label="Effective Date"
+                      value={attributes.effectiveDate}
+                      onChange={handleDateChange}
+                      slotProps={{ textField: { fullWidth: true, required: true } }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Class Structure</InputLabel>
+                    <Select
+                      value={attributes.classStructureId}
+                      label="Class Structure"
+                      onChange={handleChange('classStructureId')}
+                      disabled={isLoadingClassStructures || !filteredClassStructures?.length}
+                    >
+                      {isLoadingClassStructures ? (
+                        <MenuItem disabled>
+                          <CircularProgress size={20} />
+                          Loading...
+                        </MenuItem>
+                      ) : filteredClassStructures?.length ? (
+                        filteredClassStructures.map((structure) => (
+                          <MenuItem key={structure._id} value={structure._id}>
+                            {structure.name} ({structure.numberOfClasses} classes)
+                          </MenuItem>
+                        ))
+                      ) : (
+                        <MenuItem disabled>
+                          No class structures available for the selected criteria
+                        </MenuItem>
+                      )}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Limit Structure</InputLabel>
+                    <Select
+                      value={attributes.limitStructureId}
+                      label="Limit Structure"
+                      onChange={handleChange('limitStructureId')}
+                      disabled={
+                        isLoadingLimitStructures ||
+                        !filteredLimitStructures?.length ||
+                        !attributes.classStructureId
+                      }
+                    >
+                      {isLoadingLimitStructures ? (
+                        <MenuItem disabled>
+                          <CircularProgress size={20} />
+                          Loading...
+                        </MenuItem>
+                      ) : filteredLimitStructures?.length ? (
+                        filteredLimitStructures.map((structure) => (
+                          <MenuItem key={structure._id} value={structure._id}>
+                            {structure.name}
+                          </MenuItem>
+                        ))
+                      ) : (
+                        <MenuItem disabled>
+                          {attributes.classStructureId
+                            ? 'No compatible limit structures available'
+                            : 'Select a class structure first'}
+                        </MenuItem>
+                      )}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                {(classStructuresError || limitStructuresError) && (
+                  <Grid item xs={12}>
+                    <Alert severity="error">
+                      Error loading structures. Please try again later.
+                    </Alert>
+                  </Grid>
+                )}
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
         {/* Market & Product */}
         <Grid item xs={12} md={6}>
           <Card>
@@ -175,6 +369,12 @@ const Plans: React.FC = () => {
                         // Handle plan creation
                         clientLogger.info('Creating dental plan', { attributes });
                       }}
+                      disabled={
+                        !attributes.name ||
+                        !attributes.effectiveDate ||
+                        !attributes.classStructureId ||
+                        !attributes.limitStructureId
+                      }
                     >
                       Create Plan
                     </Button>

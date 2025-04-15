@@ -16,7 +16,8 @@ import CreateLimitForm from './components/limits/forms/CreateLimitForm';
 import LimitSummary from './components/limits/summary/LimitSummary';
 import LimitStructureList from './components/limits/pages/LimitStructureList';
 import LimitStructurePage from './components/limits/pages/LimitStructurePage';
-import Plans from './components/create/Plans';
+import CreatePlanForm from './components/plans/forms/CreatePlanForm';
+import PlanConfiguration from './components/plans/forms/PlanConfiguration';
 
 function App() {
   return (
@@ -44,8 +45,9 @@ function App() {
                 <Route path=":id" element={<LimitStructurePage />} />
               </Route>
               <Route path="plans">
-                <Route index element={<Plans />} />
-                <Route path="create" element={<Plans />} />
+                <Route index element={<CreatePlanForm />} />
+                <Route path="create" element={<CreatePlanForm />} />
+                <Route path=":planName/configure" element={<PlanConfiguration />} />
               </Route>
 
               {/* Debug Routes */}
