@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
-  Tabs,
-  Tab,
-  TextField,
   Grid,
   FormControl,
   InputLabel,
+  Input,
   Select,
   MenuItem,
   Button,
+  CircularProgress,
+  Alert,
+  FormControlLabel,
+  Switch,
+  TextField,
+  Tabs,
+  Tab,
+  Card,
+  CardContent,
   CardActions,
 } from '@mui/material';
-import { EditIcon } from '../../benefit-classes/common/icons';
+import EditableCard from '../../common/EditableCard';
 import { CostShareType, COST_SHARE_CONFIG } from '../../../types/enums';
-import { SaveOutlined, CancelOutlined } from '@mui/icons-material';
+import { SaveOutlined, CancelOutlined, Edit as EditIcon } from '@mui/icons-material';
 import { useActionBar } from '../../../context/ActionBarContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -139,97 +144,84 @@ const PlanConfiguration: React.FC = () => {
   return (
     <Box>
       {/* Header Card */}
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 3 }}>
         <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Plan Details
+          </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Plan Details
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6} lg={3}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Plan Name"
                 value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
                 disabled={!isEditing}
-                variant="outlined"
               />
             </Grid>
-            <Grid item xs={12} md={6} lg={3}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Effective Date"
+                type="date"
                 value={effectiveDate}
-                disabled
-                variant="outlined"
+                disabled={true}
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid item xs={12} md={6} lg={3}>
+            <Grid item xs={12} md={6}>
+              <TextField fullWidth label="Market Segment" value={marketSegment} disabled={true} />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField fullWidth label="Product Type" value={productType} disabled={true} />
+            </Grid>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Market Segment"
-                value={marketSegment}
-                disabled
-                variant="outlined"
+                label="Network Configuration"
+                value={`${networkTiers} tier${networkTiers > 1 ? 's' : ''}${hasOONCoverage ? ' + Out-of-Network' : ''}`}
+                disabled={true}
               />
             </Grid>
-            <Grid item xs={12} md={6} lg={3}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Product Type"
-                value={productType}
-                disabled
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} md={6} lg={3}>
-              <TextField
-                fullWidth
-                label="Class Structure"
-                value={classStructure?.name || 'Not selected'}
-                disabled
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} md={6} lg={3}>
-              <TextField
-                fullWidth
-                label="Limit Structure"
-                value={limitStructure?.name || 'Not selected'}
-                disabled
-                variant="outlined"
+                label="Coverage Type"
+                value={hasOONCoverage ? 'In and Out-of-Network' : 'In-Network Only'}
+                disabled={true}
               />
             </Grid>
           </Grid>
         </CardContent>
         <CardActions>
-          {!isEditing ? (
-            <Button startIcon={<EditIcon />} onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
-          ) : (
-            <Box>
-              <Button
-                onClick={() => {
-                  setSavedPlanName(planName);
-                  setIsEditing(false);
-                }}
-                startIcon={<SaveOutlined />}
-              >
-                Save
-              </Button>
+          {isEditing ? (
+            <Box sx={{ ml: 'auto' }}>
               <Button
                 onClick={() => {
                   setPlanName(savedPlanName);
                   setIsEditing(false);
                 }}
-                startIcon={<CancelOutlined />}
+                variant="outlined"
+                color="primary"
               >
                 Cancel
               </Button>
+              <Button
+                onClick={() => {
+                  setSavedPlanName(planName);
+                  setIsEditing(false);
+                }}
+                variant="contained"
+                color="primary"
+                sx={{ ml: 1 }}
+              >
+                Done
+              </Button>
             </Box>
+          ) : (
+            <Button variant="outlined" onClick={() => setIsEditing(true)} startIcon={<EditIcon />}>
+              Edit
+            </Button>
           )}
         </CardActions>
       </Card>
