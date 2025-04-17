@@ -22,7 +22,12 @@ import {
 } from '@mui/material';
 import EditableCard from '../../common/EditableCard';
 import { CostShareType, COST_SHARE_CONFIG } from '../../../types/enums';
-import { SaveOutlined, CancelOutlined, Edit as EditIcon } from '@mui/icons-material';
+import {
+  Edit as EditIcon,
+  Save as SaveOutlined,
+  Cancel as CancelOutlined,
+} from '@mui/icons-material';
+import { ConfirmationButtons } from '../../benefit-classes/common/ConfirmationButtons';
 import { useActionBar } from '../../../context/ActionBarContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -51,9 +56,50 @@ const PlanConfiguration: React.FC = () => {
   const [activeCoverageTab, setActiveCoverageTab] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [classCostShares, setClassCostShares] = useState<ClassCostShare[]>([]);
+  const [selectedClassStructure, setSelectedClassStructure] = useState<string>('');
+  const [selectedLimitStructure, setSelectedLimitStructure] = useState<string>('');
+  const [classStructures, setClassStructures] = useState<Array<{ id: string; name: string }>>([]);
+  const [limitStructures, setLimitStructures] = useState<Array<{ id: string; name: string }>>([]);
+  const [isLoadingStructures, setIsLoadingStructures] = useState(false);
 
   // Get form data from router state
   const formData = location.state;
+
+  // Initialize structures from form data
+  useEffect(() => {
+    console.log('Form Data:', formData);
+    if (formData) {
+      console.log('Class Structure:', formData.classStructure);
+      console.log('Limit Structure:', formData.limitStructure);
+
+      // Set selected structures
+      setSelectedClassStructure(formData.classStructure?._id || '');
+      setSelectedLimitStructure(formData.limitStructure?._id || '');
+
+      // Set available structures (for now, just show the selected ones)
+      setClassStructures(
+        [
+          formData.classStructure
+            ? {
+                id: formData.classStructure._id,
+                name: formData.classStructure.name,
+              }
+            : null,
+        ].filter(Boolean)
+      );
+
+      setLimitStructures(
+        [
+          formData.limitStructure
+            ? {
+                id: formData.limitStructure._id,
+                name: formData.limitStructure.name,
+              }
+            : null,
+        ].filter(Boolean)
+      );
+    }
+  }, [formData]);
 
   useEffect(() => {
     if (!formData) {
@@ -187,37 +233,64 @@ const PlanConfiguration: React.FC = () => {
               <TextField
                 fullWidth
                 label="Coverage Type"
-                value={hasOONCoverage ? 'In and Out-of-Network' : 'In-Network Only'}
+                value={
+                  activeCoverageTab === 0
+                    ? 'Adult'
+                    : activeCoverageTab === 1
+                      ? 'Pediatric'
+                      : 'Family'
+                }
                 disabled={true}
               />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Class Structure</InputLabel>
+                <Select
+                  value={selectedClassStructure}
+                  onChange={(e) => setSelectedClassStructure(e.target.value)}
+                  disabled={!isEditing}
+                  label="Class Structure"
+                >
+                  {classStructures.map((structure) => (
+                    <MenuItem key={structure.id} value={structure.id}>
+                      {structure.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Limit Structure</InputLabel>
+                <Select
+                  value={selectedLimitStructure}
+                  onChange={(e) => setSelectedLimitStructure(e.target.value)}
+                  disabled={!isEditing || !selectedClassStructure}
+                  label="Limit Structure"
+                >
+                  {limitStructures.map((structure) => (
+                    <MenuItem key={structure.id} value={structure.id}>
+                      {structure.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </CardContent>
         <CardActions>
           {isEditing ? (
-            <Box sx={{ ml: 'auto' }}>
-              <Button
-                onClick={() => {
-                  setPlanName(savedPlanName);
-                  setIsEditing(false);
-                }}
-                variant="outlined"
-                color="primary"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  setSavedPlanName(planName);
-                  setIsEditing(false);
-                }}
-                variant="contained"
-                color="primary"
-                sx={{ ml: 1 }}
-              >
-                Done
-              </Button>
-            </Box>
+            <ConfirmationButtons
+              onDone={() => {
+                setSavedPlanName(planName);
+                setIsEditing(false);
+              }}
+              onCancel={() => {
+                setPlanName(savedPlanName);
+                setIsEditing(false);
+              }}
+            />
           ) : (
             <Button variant="outlined" onClick={() => setIsEditing(true)} startIcon={<EditIcon />}>
               Edit
