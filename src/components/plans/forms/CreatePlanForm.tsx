@@ -32,7 +32,7 @@ interface PlanFormData {
   limitStructureName: string;
   marketSegment: string;
   productType: string;
-  coverageType: string;
+  coverageType: CoverageType;
   innTiers: number;
   oonCoverage: boolean;
 }
@@ -168,6 +168,12 @@ const CreatePlanForm: React.FC = () => {
   };
 
   const handleCreatePlan = async () => {
+    // Log the coverage type and ensure it's the enum value
+    console.log('Creating plan with coverage type (raw):', formData.coverageType);
+    console.log(
+      'Creating plan with coverage type (enum):',
+      CoverageType[formData.coverageType as keyof typeof CoverageType]
+    );
     try {
       // Validate form
       if (
@@ -192,12 +198,21 @@ const CreatePlanForm: React.FC = () => {
       const selectedLimitStructure = limitStructures.find(
         (ls: LimitStructure) => ls._id === formData.limitStructureId
       );
+      // Ensure we're passing the exact enum value, not just a string
+      const navigationState = {
+        name: formData.name,
+        effectiveDate: formData.effectiveDate,
+        classStructure: selectedClassStructure,
+        limitStructure: selectedLimitStructure,
+        marketSegment: formData.marketSegment,
+        productType: formData.productType,
+        coverageType: CoverageType[formData.coverageType as keyof typeof CoverageType],
+        innTiers: formData.innTiers,
+        oonCoverage: formData.oonCoverage,
+      };
+      console.log('Navigating with state:', navigationState);
       navigate(`/plans/${formData.name}/configure`, {
-        state: {
-          ...formData,
-          classStructure: selectedClassStructure,
-          limitStructure: selectedLimitStructure,
-        },
+        state: navigationState,
       });
     } catch (error) {
       clientLogger.info('Creating plan with data:', formData);
