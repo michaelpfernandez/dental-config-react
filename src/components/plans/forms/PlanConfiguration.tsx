@@ -42,6 +42,7 @@ import { ConfirmationButtons } from '../../benefit-classes/common/ConfirmationBu
 import { useActionBar } from '../../../context/ActionBarContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useGetBenefitClassStructureByIdQuery } from '../../../store/apis/benefitClassApi';
+import BenefitManagement from '../benefits/BenefitManagement';
 
 interface CostShareValues {
   copayAmount?: number;
@@ -515,8 +516,17 @@ const PlanConfiguration: React.FC = () => {
             {console.log('activeCoverageTab:', activeCoverageTab)}
 
             {/* Show coverage type buttons based on the selected coverage type */}
-            {selectedCoverageType === CoverageType.Both ||
-            selectedCoverageType === CoverageType.Family ? (
+            {selectedCoverageType === CoverageType.Family ? (
+              // For Family coverage type, show a Family tab
+              <Button
+                variant="contained"
+                color="secondary"
+                fullWidth
+                sx={{ justifyContent: 'center', py: 1 }}
+              >
+                Family
+              </Button>
+            ) : selectedCoverageType === CoverageType.Both ? (
               // For Both or Family coverage type, show Adult and Pediatric options
               <ToggleButtonGroup
                 value={activeCoverageTab}
@@ -570,11 +580,13 @@ const PlanConfiguration: React.FC = () => {
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Cost Share Configuration for {getNetworkTierLabel(activeNetworkTier)} -{' '}
-            {activeCoverageTab === 0
-              ? selectedCoverageType === CoverageType.Pediatric
-                ? 'Pediatric'
-                : 'Adult'
-              : 'Pediatric'}
+            {selectedCoverageType === CoverageType.Family
+              ? 'Family'
+              : activeCoverageTab === 0
+                ? selectedCoverageType === CoverageType.Pediatric
+                  ? 'Pediatric'
+                  : 'Adult'
+                : 'Pediatric'}
           </Typography>
 
           {/* Table with striped rows for better readability */}
@@ -775,7 +787,38 @@ const PlanConfiguration: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Benefit Details Section - TODO */}
+      {/* Benefit Management Section */}
+      <BenefitManagement
+        classStructure={detailedClassStructure}
+        limitStructure={formData?.limitStructure}
+        costShares={classCostShares}
+        activeNetworkTier={activeNetworkTier}
+        activeCoverageType={
+          selectedCoverageType === CoverageType.Both
+            ? activeCoverageTab === 0
+              ? CoverageType.Adult
+              : CoverageType.Pediatric
+            : selectedCoverageType
+        }
+        getNetworkTierLabel={getNetworkTierLabel}
+        onCostShareChange={(updatedCostShares) => setClassCostShares(updatedCostShares)}
+        onLimitChange={(updatedLimits) => {
+          // Update the limit structure in the form data
+          if (formData?.limitStructure) {
+            const updatedLimitStructure = {
+              ...formData.limitStructure,
+              limits: updatedLimits,
+            };
+            // Update form data
+            const updatedFormData = {
+              ...formData,
+              limitStructure: updatedLimitStructure,
+            };
+            // You might need to update this in your global state or context
+            console.log('Updated limit structure:', updatedLimitStructure);
+          }
+        }}
+      />
     </Box>
   );
 };

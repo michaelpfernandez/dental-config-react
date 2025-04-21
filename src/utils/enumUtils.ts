@@ -4,6 +4,8 @@ import {
   CoverageType,
   NetworkTiers,
   CostShareType,
+  LimitIntervalType,
+  UnitType,
 } from '../types/enums';
 
 export const enumDisplayNames = {
@@ -35,6 +37,16 @@ export const enumDisplayNames = {
   [CostShareType.DeductibleThenCoinsurance]: 'Deductible Then Coinsurance',
   [CostShareType.DeductibleThenCopay]: 'Deductible Then Copay',
   [CostShareType.NotCovered]: 'Not Covered',
+
+  // Limit Interval Types
+  [LimitIntervalType.PerVisit]: 'Per Visit',
+  [LimitIntervalType.PerYear]: 'Per Year',
+  [LimitIntervalType.PerLifetime]: 'Per Lifetime',
+
+  // Unit Types
+  [UnitType.PerTooth]: 'Per Tooth',
+  [UnitType.PerItem]: 'Per Item',
+  [UnitType.N_A]: '',
 };
 
 export const getEnumDisplayName = (enumValue: string | number) => {
