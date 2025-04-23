@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -19,6 +19,9 @@ import {
   Alert,
   CircularProgress,
   InputAdornment,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   DndContext,
@@ -28,6 +31,10 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  DropAnimation,
+  defaultDropAnimation,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -49,6 +56,9 @@ import {
   DragIndicator as DragIcon,
   Add as AddIcon,
   Check as CheckIcon,
+  ArrowForward as ArrowForwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 
 // Define interfaces for our data structures
@@ -119,6 +129,7 @@ interface BenefitManagementProps {
   getNetworkTierLabel: (index: number) => string;
   onCostShareChange: (updatedCostShares: BenefitCostShare[]) => void;
   onLimitChange: (updatedLimits: BenefitLimit[]) => void;
+  onClassStructureChange: (updatedClassStructure: ClassStructure) => void;
 }
 
 // Props for the SortableItem component
@@ -135,8 +146,8 @@ interface SortableItemProps {
   handleCostShareValueChange: (
     classId: string,
     benefitId: string,
-    field: keyof CostShareValues,
-    value: number | undefined
+    field: 'copay' | 'coinsurance',
+    value: number | null
   ) => void;
   handleLimitChange: (
     classId: string,
@@ -145,6 +156,14 @@ interface SortableItemProps {
     value: any
   ) => void;
   toggleLimitEditing: (classId: string, benefitId: string) => void;
+  selectBenefitForMove: (benefit: Benefit, classId: string) => void;
+  moveBenefitToClass: (benefitId: string, fromClassId: string, toClassId: string) => void;
+  benefitClasses: BenefitClass[];
+  selectedBenefitForMove: {
+    benefitId: string;
+    fromClassId: string;
+    benefitName: string;
+  } | null;
 }
 
 // Sortable item component using dnd-kit
@@ -158,15 +177,50 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
   getNetworkTierLabel,
   onCostShareChange,
   onLimitChange,
+  onClassStructureChange,
 }) => {
-  // State to manage the benefit classes
-  const [benefitClasses, setBenefitClasses] = useState<BenefitClass[]>([]);
+  // DEBUG LOGGING
+  console.log('BenefitManagement: classStructure prop:', classStructure);
+  console.log('BenefitManagement: classStructure.classes:', classStructure?.classes);
+  if (classStructure?.classes) {
+    classStructure.classes.forEach((cls, idx) => {
+      console.log(`BenefitManagement: Class ${idx}:`, cls);
+      console.log(`BenefitManagement: Class ${idx} benefits:`, cls.benefits);
+    });
+  }
+
+  // Always derive benefitClasses from classStructure prop
+  const benefitClasses = useMemo(() => {
+    // Defensive: handle null/undefined
+    if (!classStructure || !classStructure.classes) return [];
+    return classStructure.classes.map((cls) => ({
+      id: cls._id,
+      name: cls.name,
+      benefits: cls.benefits || [],
+    }));
+  }, [classStructure, costShares, limitStructure]);
+
+  // DEBUG LOGGING
+  console.log('BenefitManagement: benefitClasses (derived):', benefitClasses);
+  benefitClasses.forEach((bc, idx) => {
+    console.log(`BenefitManagement: benefitClasses[${idx}]:`, bc);
+    console.log(`BenefitManagement: benefitClasses[${idx}].benefits:`, bc.benefits);
+  });
+
   const [editingLimitBenefitId, setEditingLimitBenefitId] = useState<string | null>(null);
   const [editingLimitClassId, setEditingLimitClassId] = useState<string | null>(null);
   const [limitValidationError, setLimitValidationError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [addingToClassId, setAddingToClassId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Simple state for direct benefit movement
+  const [selectedBenefitForMove, setSelectedBenefitForMove] = useState<{
+    benefitId: string;
+    fromClassId: string;
+    benefitName: string;
+  } | null>(null);
 
   // Set up sensors for drag and drop
   const sensors = useSensors(
@@ -180,187 +234,176 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
     })
   );
 
-  // Debug logging for limit structure
-  useEffect(() => {
-    console.log('Limit Structure received in BenefitManagement:', limitStructure);
-    if (limitStructure && limitStructure.limits) {
-      console.log('Limit Structure limits:', limitStructure.limits);
-      console.log('Number of limits:', limitStructure.limits.length);
+  // Handle drag start event
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    setActiveId(active.id as string);
+  };
 
-      // Log a few sample limits if they exist
-      if (limitStructure.limits.length > 0) {
-        console.log('Sample limit 0:', limitStructure.limits[0]);
-      }
-      if (limitStructure.limits.length > 1) {
-        console.log('Sample limit 1:', limitStructure.limits[1]);
-      }
-    } else {
-      console.log('No limits found in limit structure or limit structure is undefined');
+  // Initialize limit structure
+  useEffect(() => {
+    if (limitStructure && limitStructure.limits) {
+      // Process limits if needed
     }
   }, [limitStructure]);
 
-  // Initialize benefit classes from class structure
-  useEffect(() => {
-    setIsLoading(true);
-    setError(null);
-
-    console.log('Initializing benefit classes with:', {
-      classStructure,
-      limitStructure,
-      costShares,
-    });
-
-    try {
-      if (
-        classStructure &&
-        Array.isArray(classStructure.classes) &&
-        classStructure.classes.length > 0
-      ) {
-        const classes: BenefitClass[] = classStructure.classes.map((cls) => {
-          console.log(`Processing class ${cls.name} with ID ${cls._id}`);
-          return {
-            id: cls._id,
-            name: cls.name,
-            benefits: cls.benefits.map((benefit) => {
-              // Log benefit processing
-              console.log(
-                `Processing benefit ${benefit.name} with ID ${benefit.id} in class ${cls.name}`
-              );
-
-              // Find limits for this benefit
-              const benefitLimits =
-                limitStructure?.limits?.filter(
-                  (limit) => limit.classId === cls._id && limit.benefitId === benefit.id
-                ) || [];
-
-              console.log(`Found ${benefitLimits.length} limits for benefit ${benefit.name}`);
-
-              return {
-                id: benefit.id,
-                name: benefit.name,
-                description: benefit.description,
-                costShares: costShares.filter(
-                  (cs) => cs.classId === cls._id && cs.benefitId === benefit.id
-                ),
-                limits: benefitLimits,
-              };
-            }),
-          };
-        });
-        console.log('Final processed benefit classes:', classes);
-        setBenefitClasses(classes);
-      } else {
-        console.log('No valid class structure found:', classStructure);
-        setError('No benefit classes found in the class structure');
-        setBenefitClasses([]);
-      }
-    } catch (err) {
-      console.error('Error processing class structure:', err);
-      setError('Error processing benefit classes');
-      setBenefitClasses([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [classStructure, limitStructure, costShares]);
-
   // Handle drag end event
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+
     const { active, over } = event;
 
     // If no valid drop target or same position
-    if (!over) return;
+    if (!over) {
+      console.warn('DragEnd: No valid drop target.');
+      return;
+    }
 
     // Extract IDs from the active and over items
     const activeId = active.id as string;
     const overId = over.id as string;
+    console.log('DragEnd event:', { activeId, overId });
 
-    if (activeId === overId) return;
+    if (activeId === overId) {
+      console.log('DragEnd: activeId and overId are the same, no move needed.');
+      return;
+    }
 
     // Parse the IDs to get class ID and benefit ID
     // Format: "classId-benefitId"
     const [sourceClassId, sourceBenefitId] = activeId.split('-');
     const [destinationClassId, destinationBenefitId] = overId.split('-');
+    console.log('Parsed IDs:', {
+      sourceClassId,
+      sourceBenefitId,
+      destinationClassId,
+      destinationBenefitId,
+    });
 
-    // Find the classes in our state
-    const sourceClassIndex = benefitClasses.findIndex((cls) => cls.id === sourceClassId);
-    const destinationClassIndex = benefitClasses.findIndex((cls) => cls.id === destinationClassId);
-
-    if (sourceClassIndex === -1 || destinationClassIndex === -1) {
-      console.error('Could not find source or destination class');
+    // If we're dragging between classes
+    if (sourceClassId !== destinationClassId) {
+      console.log(
+        `Moving benefit '${sourceBenefitId}' from class '${sourceClassId}' to class '${destinationClassId}'`
+      );
+      // Build new classStructure with benefit moved
+      if (!classStructure || !Array.isArray(classStructure.classes)) return;
+      const updatedClasses = classStructure.classes.map((cls) => {
+        if (cls._id === sourceClassId) {
+          return {
+            ...cls,
+            benefits: cls.benefits.filter((b) => b.id !== sourceBenefitId),
+          };
+        }
+        if (cls._id === destinationClassId) {
+          // Find the benefit to move
+          const sourceClass = classStructure.classes.find((c) => c._id === sourceClassId);
+          const benefitToMove = sourceClass?.benefits.find((b) => b.id === sourceBenefitId);
+          if (benefitToMove) {
+            return {
+              ...cls,
+              benefits: [...cls.benefits, benefitToMove],
+            };
+          }
+        }
+        return cls;
+      });
+      const updatedClassStructure = {
+        ...classStructure,
+        classes: updatedClasses,
+      };
+      onClassStructureChange(updatedClassStructure);
       return;
     }
 
-    // Create a new array of classes to avoid mutating state
-    const newBenefitClasses = [...benefitClasses];
+    // If we're just reordering within the same class
+    // Find the class in our state
+    if (!classStructure || !Array.isArray(classStructure.classes)) return;
+    const sourceClassIndex = classStructure.classes.findIndex(
+      (cls) => String(cls._id) === String(sourceClassId)
+    );
+    if (sourceClassIndex === -1) return;
+    const sourceClass = classStructure.classes[sourceClassIndex];
+    const sourceBenefits = [...sourceClass.benefits];
+    const sourceItemIndex = sourceBenefits.findIndex(
+      (benefit) => String(benefit.id) === String(sourceBenefitId)
+    );
+    const destinationItemIndex = sourceBenefits.findIndex(
+      (benefit) => String(benefit.id) === String(destinationBenefitId)
+    );
+    if (sourceItemIndex === -1 || destinationItemIndex === -1) return;
+    // Reorder the benefits in the class using arrayMove utility
+    const newBenefits = arrayMove(sourceBenefits, sourceItemIndex, destinationItemIndex);
+    const updatedClasses = classStructure.classes.map((cls, idx) =>
+      idx === sourceClassIndex ? { ...cls, benefits: newBenefits } : cls
+    );
+    const updatedClassStructure = {
+      ...classStructure,
+      classes: updatedClasses,
+    };
+    onClassStructureChange(updatedClassStructure);
+  };
 
-    // Get the source and destination benefits
-    const sourceBenefits = [...newBenefitClasses[sourceClassIndex].benefits];
-    const sourceItemIndex = sourceBenefits.findIndex((benefit) => benefit.id === sourceBenefitId);
+  // Get cost share for a specific benefit
+  const getCostShare = (classId: string, benefitId: string) => {
+    // First, try to find a benefit-specific cost share
+    const benefitCostShare = costShares.find(
+      (cs) =>
+        cs.classId === classId &&
+        cs.benefitId === benefitId &&
+        cs.networkTier === activeNetworkTier &&
+        cs.coverageType === activeCoverageType
+    );
 
-    // If moving within the same class
-    if (sourceClassId === destinationClassId) {
-      const destinationItemIndex = sourceBenefits.findIndex(
-        (benefit) => benefit.id === destinationBenefitId
-      );
-
-      // Reorder the benefits in the class using arrayMove utility
-      newBenefitClasses[sourceClassIndex].benefits = arrayMove(
-        sourceBenefits,
-        sourceItemIndex,
-        destinationItemIndex
-      );
-    } else {
-      // Moving between classes
-      const destinationBenefits = [...newBenefitClasses[destinationClassIndex].benefits];
-      const destinationItemIndex = destinationBenefits.findIndex(
-        (benefit) => benefit.id === destinationBenefitId
-      );
-
-      // Get the benefit being moved
-      const movedBenefit = sourceBenefits[sourceItemIndex];
-
-      // Remove from source class
-      sourceBenefits.splice(sourceItemIndex, 1);
-      newBenefitClasses[sourceClassIndex].benefits = sourceBenefits;
-
-      // Add to destination class
-      destinationBenefits.splice(
-        destinationItemIndex >= 0 ? destinationItemIndex : destinationBenefits.length,
-        0,
-        movedBenefit
-      );
-      newBenefitClasses[destinationClassIndex].benefits = destinationBenefits;
-
-      // Update cost shares for the moved benefit to reflect the new class
-      const updatedCostShares = costShares.map((cs) => {
-        if (cs.benefitId === movedBenefit.id && cs.classId === sourceClassId) {
-          return {
-            ...cs,
-            classId: destinationClassId,
-          };
-        }
-        return cs;
-      });
-
-      // Update limits for the moved benefit to reflect the new class
-      const updatedLimits =
-        limitStructure?.limits?.map((limit) => {
-          if (limit.benefitId === movedBenefit.id && limit.classId === sourceClassId) {
-            return {
-              ...limit,
-              classId: destinationClassId,
-            };
-          }
-          return limit;
-        }) || [];
-
-      // Call the callbacks to update parent state
-      onCostShareChange(updatedCostShares);
-      onLimitChange(updatedLimits);
+    // If we found a benefit-specific cost share, return it
+    if (benefitCostShare) {
+      return benefitCostShare;
     }
 
-    // Update our local state
-    setBenefitClasses(newBenefitClasses);
+    // Otherwise, look for a class-level cost share to inherit from
+    // This is identified by having a classId but no benefitId
+    const classCostShare = costShares.find(
+      (cs) =>
+        cs.classId === classId &&
+        !cs.benefitId && // Class-level cost shares don't have a benefitId
+        cs.networkTier === activeNetworkTier &&
+        cs.coverageType === activeCoverageType
+    );
+
+    // If we found a class-level cost share, create a new cost share object for this benefit
+    // that inherits the values from the class-level cost share
+    if (classCostShare) {
+      return {
+        classId,
+        benefitId,
+        costShareType: classCostShare.costShareType,
+        values: { ...classCostShare.values },
+        networkTier: activeNetworkTier,
+        coverageType: activeCoverageType,
+      };
+    }
+
+    // If we couldn't find either, return undefined
+    return undefined;
+  };
+
+  // Get limit for a specific benefit - match only on benefit ID
+  const getLimit = (classId: string, benefitId: string) => {
+    // First, check if we have a limit structure
+    if (!limitStructure || !limitStructure.limits) {
+      return undefined;
+    }
+
+    // Look for a benefit-specific limit using only the benefit ID
+    // This allows benefits to be moved between classes while keeping their limits
+    const benefitLimit = limitStructure.limits.find((limit) => limit.benefitId === benefitId);
+
+    if (benefitLimit) {
+      return benefitLimit;
+    }
+
+    // If no benefit-specific limit is found, we don't try to use class-level limits
+    // since the class association can change with drag and drop
+    return undefined;
   };
 
   // Handle cost share type change
@@ -479,76 +522,6 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
     onLimitChange(updatedLimits);
   };
 
-  // Get cost share for a specific benefit
-  const getCostShare = (classId: string, benefitId: string) => {
-    // First, try to find a benefit-specific cost share
-    const benefitCostShare = costShares.find(
-      (cs) =>
-        cs.classId === classId &&
-        cs.benefitId === benefitId &&
-        cs.networkTier === activeNetworkTier &&
-        cs.coverageType === activeCoverageType
-    );
-
-    // If we found a benefit-specific cost share, return it
-    if (benefitCostShare) {
-      return benefitCostShare;
-    }
-
-    // Otherwise, look for a class-level cost share to inherit from
-    // This is identified by having a classId but no benefitId
-    const classCostShare = costShares.find(
-      (cs) =>
-        cs.classId === classId &&
-        !cs.benefitId && // Class-level cost shares don't have a benefitId
-        cs.networkTier === activeNetworkTier &&
-        cs.coverageType === activeCoverageType
-    );
-
-    // If we found a class-level cost share, create a new cost share object for this benefit
-    // that inherits the values from the class-level cost share
-    if (classCostShare) {
-      return {
-        classId,
-        benefitId,
-        costShareType: classCostShare.costShareType,
-        values: { ...classCostShare.values },
-        networkTier: activeNetworkTier,
-        coverageType: activeCoverageType,
-      };
-    }
-
-    // If we couldn't find either, return undefined
-    return undefined;
-  };
-
-  // This function has been moved to the SortableItem component
-
-  // Get limit for a specific benefit - match only on benefit ID
-  const getLimit = (classId: string, benefitId: string) => {
-    // First, check if we have a limit structure
-    if (!limitStructure || !limitStructure.limits) {
-      console.log('No limit structure or limits available');
-      return undefined;
-    }
-
-    console.log(`Looking for limit with benefitId=${benefitId}`);
-
-    // Look for a benefit-specific limit using only the benefit ID
-    // This allows benefits to be moved between classes while keeping their limits
-    const benefitLimit = limitStructure.limits.find((limit) => limit.benefitId === benefitId);
-
-    if (benefitLimit) {
-      console.log(`Found limit for benefit ${benefitId}:`, benefitLimit);
-      return benefitLimit;
-    }
-
-    // If no benefit-specific limit is found, we don't try to use class-level limits
-    // since the class association can change with drag and drop
-    console.log(`No limit found for benefit ${benefitId}`);
-    return undefined;
-  };
-
   // Toggle limit editing
   const toggleLimitEditing = (classId: string, benefitId: string) => {
     if (editingLimitBenefitId === benefitId && editingLimitClassId === classId) {
@@ -561,6 +534,97 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
     setLimitValidationError(null);
   };
 
+  const moveBenefitToClass = (benefitId: string, fromClassId: string, toClassId: string) => {
+    // Find the source and destination classes
+    const sourceClass = benefitClasses.find((c) => String(c.id) === String(fromClassId));
+    const destClass = benefitClasses.find((c) => String(c.id) === String(toClassId));
+
+    // Find the benefit to move
+    const benefitToMove = sourceClass?.benefits.find((b) => String(b.id) === String(benefitId));
+
+    if (!sourceClass || !destClass || !benefitToMove) {
+      console.error('Missing data for move operation');
+      return;
+    }
+
+    // Create updated classes with the benefit moved
+    const updatedClasses = benefitClasses.map((cls) => {
+      // Remove from source class
+      if (String(cls.id) === String(fromClassId)) {
+        return {
+          ...cls,
+          benefits: cls.benefits.filter((b) => String(b.id) !== String(benefitId)),
+        };
+      }
+
+      // Add to destination class
+      if (String(cls.id) === String(toClassId)) {
+        return {
+          ...cls,
+          benefits: [...cls.benefits, benefitToMove],
+        };
+      }
+
+      return cls;
+    });
+
+    // Find class-level cost share for destination class
+    const destinationClassCostShare = costShares.find(
+      (cs) =>
+        String(cs.classId) === String(toClassId) &&
+        !cs.benefitId &&
+        cs.networkTier === activeNetworkTier &&
+        cs.coverageType === activeCoverageType
+    );
+
+    // Update cost shares
+    const updatedCostShares = costShares.map((cs) => {
+      if (
+        String(cs.benefitId) === String(benefitId) &&
+        String(cs.classId) === String(fromClassId) &&
+        cs.networkTier === activeNetworkTier &&
+        cs.coverageType === activeCoverageType
+      ) {
+        if (destinationClassCostShare) {
+          return {
+            ...cs,
+            classId: toClassId,
+            costShareType: destinationClassCostShare.costShareType,
+            values: { ...destinationClassCostShare.values },
+          };
+        } else {
+          return {
+            ...cs,
+            classId: toClassId,
+          };
+        }
+      }
+      return cs;
+    });
+
+    // Update limits
+    const updatedLimits =
+      limitStructure?.limits?.map((limit) => {
+        if (
+          String(limit.benefitId) === String(benefitId) &&
+          String(limit.classId) === String(fromClassId)
+        ) {
+          return {
+            ...limit,
+            classId: toClassId,
+          };
+        }
+        return limit;
+      }) || [];
+
+    // Update state
+    onCostShareChange(updatedCostShares);
+    onLimitChange(updatedLimits);
+
+    // Clear selected benefit
+    setSelectedBenefitForMove(null);
+  };
+
   // Toggle adding benefits to a class
   const toggleAddingToClass = (classId: string) => {
     if (addingToClassId === classId) {
@@ -568,6 +632,19 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
     } else {
       setAddingToClassId(classId);
     }
+  };
+
+  // Get all unique benefits across all classes
+  const getAllUniqueBenefits = () => {
+    const uniqueBenefits = new Map<string, { id: string; name: string }>();
+
+    benefitClasses.forEach((cls) => {
+      cls.benefits.forEach((benefit) => {
+        uniqueBenefits.set(benefit.id, { id: benefit.id, name: benefit.name });
+      });
+    });
+
+    return Array.from(uniqueBenefits.values());
   };
 
   // Get all available benefits that are not in a specific class
@@ -586,176 +663,199 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
     return allBenefits.filter((benefit) => !benefitIdsInClass.includes(benefit.id));
   };
 
-  // Add a benefit to a class
-  const addBenefitToClass = (classId: string, benefitId: string, benefitName: string) => {
-    // Find the class
-    const classIndex = benefitClasses.findIndex((cls) => cls.id === classId);
-    if (classIndex === -1) return;
-
-    // Create a copy of the benefit classes
-    const newBenefitClasses = [...benefitClasses];
-
-    // Add the benefit to the class
-    const newBenefit: Benefit = {
-      id: benefitId,
-      name: benefitName,
-      costShares: [],
-      limits: [],
-    };
-
-    newBenefitClasses[classIndex].benefits.push(newBenefit);
-
-    // Create cost shares for the new benefit for all network tiers and coverage types
-    const newCostShares = [...costShares];
-
-    // Find the existing cost share for this class in the current network tier and coverage type
-    // This is the cost share from the cost share configuration table
-    const existingClassCostShare = costShares.find(
-      (cs) =>
-        cs.classId === classId &&
-        cs.networkTier === activeNetworkTier &&
-        cs.coverageType === activeCoverageType
-    );
-
-    // Add cost share for the current network tier and coverage type
-    // Inherit values from the class cost share configuration if available
-    newCostShares.push({
-      classId,
-      benefitId,
-      // Use the cost share type from the class configuration, or default to Coinsurance
-      costShareType: existingClassCostShare?.costShareType || CostShareType.Coinsurance,
-      // Use the values from the class configuration, or default values
-      values: existingClassCostShare?.values || { coinsurancePercentage: 20 },
-      networkTier: activeNetworkTier,
-      coverageType: activeCoverageType,
+  // Select a benefit for moving
+  const selectBenefitForMove = (benefit: Benefit, classId: string) => {
+    setSelectedBenefitForMove({
+      benefitId: benefit.id,
+      fromClassId: classId,
+      benefitName: benefit.name,
     });
-
-    // Update state
-    setBenefitClasses(newBenefitClasses);
-    onCostShareChange(newCostShares);
-
-    // Close the add benefit panel
-    setAddingToClassId(null);
   };
 
-  // Get all unique benefits across all classes
-  const getAllUniqueBenefits = () => {
-    const uniqueBenefits = new Map<string, { id: string; name: string }>();
-
-    benefitClasses.forEach((cls) => {
-      cls.benefits.forEach((benefit) => {
-        uniqueBenefits.set(benefit.id, { id: benefit.id, name: benefit.name });
-      });
-    });
-
-    return Array.from(uniqueBenefits.values());
+  // Cancel benefit selection
+  const clearSelectedBenefit = () => {
+    setSelectedBenefitForMove(null);
   };
 
   return (
     <Box sx={{ width: '100%' }}>
-      {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+      {/* Benefit movement banner */}
+      {selectedBenefitForMove && (
+        <Paper
+          elevation={3}
+          sx={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 1000,
+            p: 2,
+            mb: 2,
+            bgcolor: 'primary.light',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body1" fontWeight="bold" sx={{ mr: 1 }}>
+              Moving: {selectedBenefitForMove.benefitName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Select a destination class below
+            </Typography>
+          </Box>
+          <Button variant="outlined" color="inherit" size="small" onClick={clearSelectedBenefit}>
+            Cancel
+          </Button>
+        </Paper>
+      )}
+
+      {error ? (
+        <Alert severity="error">{error}</Alert>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {benefitClasses.map((benefitClass) => (
-              <Paper key={benefitClass.id} sx={{ mb: 3, overflow: 'hidden' }}>
-                {/* Class Header */}
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography variant="h6">
-                    {benefitClass.name} ({benefitClass.benefits.length} Benefits)
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    startIcon={<AddIcon />}
-                    onClick={() => toggleAddingToClass(benefitClass.id)}
-                  >
-                    Add Benefit
-                  </Button>
-                </Box>
-
-                {/* Add Benefit Panel */}
-                {addingToClassId === benefitClass.id && (
-                  <Box sx={{ p: 2, bgcolor: 'action.hover' }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Add benefit to {benefitClass.name}:
-                    </Typography>
-                    <Grid container spacing={1}>
-                      {getAvailableBenefitsForClass(benefitClass.id).length > 0 ? (
-                        getAvailableBenefitsForClass(benefitClass.id).map((benefit) => (
-                          <Grid item xs={12} sm={6} md={4} lg={3} key={benefit.id}>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              fullWidth
-                              sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                              onClick={() =>
-                                addBenefitToClass(benefitClass.id, benefit.id, benefit.name)
-                              }
-                            >
-                              {benefit.name}
-                            </Button>
-                          </Grid>
-                        ))
-                      ) : (
-                        <Grid item xs={12}>
-                          <Typography color="text.secondary">
-                            No available benefits to add
-                          </Typography>
-                        </Grid>
-                      )}
-                    </Grid>
-                  </Box>
-                )}
-
-                {/* Benefits Table - Using a non-table structure for drag and drop compatibility */}
-                <Paper sx={{ mb: 2 }}>
-                  {/* Table Header - Static */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          {/* Create a single array of all items for the SortableContext */}
+          <SortableContext
+            items={benefitClasses.flatMap((cls) =>
+              cls.benefits.map((b) => `${String(cls.id)}-${String(b.id)}`)
+            )}
+            strategy={verticalListSortingStrategy}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {benefitClasses.map((benefitClass) => (
+                <Paper key={benefitClass.id} sx={{ mb: 3, overflow: 'hidden' }}>
+                  {/* Class Header */}
                   <Box
                     sx={{
+                      p: 2,
+                      bgcolor: selectedBenefitForMove ? 'primary.light' : 'primary.main',
+                      color: 'primary.contrastText',
                       display: 'flex',
-                      bgcolor: 'background.paper',
-                      borderBottom: 1,
-                      borderColor: 'divider',
-                      px: 2,
-                      py: 1.5,
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor:
+                        selectedBenefitForMove &&
+                        selectedBenefitForMove.fromClassId !== benefitClass.id
+                          ? 'pointer'
+                          : 'default',
+                      '&:hover':
+                        selectedBenefitForMove &&
+                        selectedBenefitForMove.fromClassId !== benefitClass.id
+                          ? { bgcolor: 'primary.dark' }
+                          : {},
+                    }}
+                    onClick={() => {
+                      if (
+                        selectedBenefitForMove &&
+                        selectedBenefitForMove.fromClassId !== benefitClass.id
+                      ) {
+                        moveBenefitToClass(
+                          selectedBenefitForMove.benefitId,
+                          selectedBenefitForMove.fromClassId,
+                          benefitClass.id
+                        );
+                      }
                     }}
                   >
-                    <Box sx={{ width: '30px' }}></Box>
-                    <Box sx={{ width: '200px', fontWeight: 'bold' }}>Benefit</Box>
-                    <Box sx={{ width: '150px', fontWeight: 'bold' }}>Cost Share Type</Box>
-                    <Box sx={{ width: '120px', fontWeight: 'bold' }}>Copay</Box>
-                    <Box sx={{ width: '120px', fontWeight: 'bold' }}>Coinsurance</Box>
-                    <Box sx={{ flexGrow: 1, fontWeight: 'bold' }}>Limit</Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="h6" sx={{ mr: 2 }}>
+                        {benefitClass.name} ({benefitClass.benefits.length} Benefits)
+                      </Typography>
+                      {selectedBenefitForMove &&
+                        selectedBenefitForMove.fromClassId !== benefitClass.id && (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'primary.contrastText',
+                              bgcolor: 'primary.dark',
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: 1,
+                            }}
+                          >
+                            Click to move here
+                          </Typography>
+                        )}
+                    </Box>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      size="small"
+                      startIcon={<AddIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleAddingToClass(benefitClass.id);
+                      }}
+                    >
+                      Add Benefit
+                    </Button>
                   </Box>
 
-                  {/* Droppable Area */}
-                  <SortableContext
-                    items={benefitClass.benefits.map((b) => `${benefitClass.id}-${b.id}`)}
-                    strategy={verticalListSortingStrategy}
-                  >
+                  {/* Add Benefit Panel */}
+                  {addingToClassId === benefitClass.id && (
+                    <Box sx={{ p: 2, bgcolor: 'action.hover' }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Add benefit to {benefitClass.name}:
+                      </Typography>
+                      <Grid container spacing={1}>
+                        {getAvailableBenefitsForClass(benefitClass.id).length > 0 ? (
+                          getAvailableBenefitsForClass(benefitClass.id).map((benefit) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={benefit.id}>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                fullWidth
+                                sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
+                                onClick={() =>
+                                  addBenefitToClass(benefitClass.id, benefit.id, benefit.name)
+                                }
+                              >
+                                {benefit.name}
+                              </Button>
+                            </Grid>
+                          ))
+                        ) : (
+                          <Grid item xs={12}>
+                            <Typography color="text.secondary">
+                              No available benefits to add
+                            </Typography>
+                          </Grid>
+                        )}
+                      </Grid>
+                    </Box>
+                  )}
+
+                  {/* Benefits Table - Using a non-table structure for drag and drop compatibility */}
+                  <Box sx={{ mb: 2 }}>
+                    {/* Table Header - Static */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        bgcolor: 'background.paper',
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                        px: 2,
+                        py: 1.5,
+                      }}
+                    >
+                      <Box sx={{ width: '30px' }}></Box>
+                      <Box sx={{ width: '200px', fontWeight: 'bold' }}>Benefit</Box>
+                      <Box sx={{ width: '150px', fontWeight: 'bold' }}>Cost Share Type</Box>
+                      <Box sx={{ width: '120px', fontWeight: 'bold' }}>Copay</Box>
+                      <Box sx={{ width: '120px', fontWeight: 'bold' }}>Coinsurance</Box>
+                      <Box sx={{ flexGrow: 1, fontWeight: 'bold' }}>Limit</Box>
+                    </Box>
+
+                    {/* Benefit Items */}
                     <Box sx={{ p: 1 }}>
                       {benefitClass.benefits.map((benefit) => (
                         <SortableItem
                           key={benefit.id}
-                          id={`${benefitClass.id}-${benefit.id}`}
+                          id={`${String(benefitClass.id)}-${String(benefit.id)}`}
                           benefit={benefit}
                           classId={benefitClass.id}
                           getCostShare={getCostShare}
@@ -767,6 +867,10 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
                           handleCostShareValueChange={handleCostShareValueChange}
                           handleLimitChange={handleLimitChange}
                           toggleLimitEditing={toggleLimitEditing}
+                          selectBenefitForMove={selectBenefitForMove}
+                          moveBenefitToClass={moveBenefitToClass}
+                          benefitClasses={benefitClasses}
+                          selectedBenefitForMove={selectedBenefitForMove}
                         />
                       ))}
                       {benefitClass.benefits.length === 0 && (
@@ -777,11 +881,11 @@ const BenefitManagement: React.FC<BenefitManagementProps> = ({
                         </Box>
                       )}
                     </Box>
-                  </SortableContext>
+                  </Box>
                 </Paper>
-              </Paper>
-            ))}
-          </Box>
+              ))}
+            </Box>
+          </SortableContext>
         </DndContext>
       )}
     </Box>
@@ -804,16 +908,28 @@ const SortableItem = ({
   handleCostShareValueChange,
   handleLimitChange,
   toggleLimitEditing,
+  selectBenefitForMove,
+  moveBenefitToClass,
+  benefitClasses,
+  selectedBenefitForMove,
 }: SortableItemProps) => {
   // We now use getEnumDisplayName for limit interval types
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
+    data: {
+      type: 'benefit',
+      benefit,
+      classId,
+    },
   });
 
   const costShare = getCostShare(classId, benefit.id);
   const limit = getLimit(classId, benefit.id);
   const isEditingLimit = editingLimitBenefitId === benefit.id && editingLimitClassId === classId;
+  const isMoving =
+    selectedBenefitForMove?.benefitId === benefit.id &&
+    selectedBenefitForMove?.fromClassId === classId;
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -831,20 +947,36 @@ const SortableItem = ({
         alignItems: 'center',
         p: 1,
         mb: 1,
-        bgcolor: 'background.paper',
+        bgcolor: isMoving ? 'primary.light' : 'background.paper',
         borderRadius: 1,
+        boxShadow: 1,
+        position: 'relative',
         '&:hover': { bgcolor: 'action.hover' },
       }}
     >
       {/* Drag Handle */}
-      <Box sx={{ width: '30px' }} {...attributes} {...listeners}>
-        <DragIcon fontSize="small" color="action" />
+      <Box sx={{ width: '30px', display: 'flex', alignItems: 'center' }}>
+        <Box {...attributes} {...listeners} sx={{ display: 'flex', cursor: 'grab' }}>
+          <DragIcon fontSize="small" color="action" />
+        </Box>
+      </Box>
+
+      {/* Move Button */}
+      <Box sx={{ width: '30px', mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => selectBenefitForMove(benefit, classId)}
+          aria-label="move benefit"
+          color={selectedBenefitForMove?.benefitId === benefit.id ? 'primary' : 'default'}
+        >
+          <ArrowForwardIcon fontSize="small" />
+        </IconButton>
       </Box>
 
       {/* Benefit Name */}
       <Box sx={{ width: '200px' }}>
         <Typography variant="body2" fontWeight="medium">
-          {benefit.name}
+          {benefit.name || ''}
         </Typography>
       </Box>
 

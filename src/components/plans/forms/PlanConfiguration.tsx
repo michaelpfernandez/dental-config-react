@@ -59,6 +59,9 @@ interface ClassCostShare {
 }
 
 const PlanConfiguration: React.FC = () => {
+  // ...existing state...
+  const [currentClassStructure, setCurrentClassStructure] = useState<any>(null);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { setActions } = useActionBar();
@@ -104,15 +107,19 @@ const PlanConfiguration: React.FC = () => {
 
   // Log the detailed class structure
   useEffect(() => {
-    if (detailedClassStructure) {
+    if (
+      detailedClassStructure &&
+      (!currentClassStructure || currentClassStructure._id !== detailedClassStructure._id)
+    ) {
       console.log('Detailed Class Structure:', detailedClassStructure);
       console.log('Detailed Class Structure Classes:', detailedClassStructure.classes);
       console.log(
         'Detailed Class Structure Classes Length:',
         detailedClassStructure.classes?.length
       );
+      setCurrentClassStructure(detailedClassStructure);
     }
-  }, [detailedClassStructure]);
+  }, [detailedClassStructure, currentClassStructure]);
 
   // Initialize structures from form data
   useEffect(() => {
@@ -789,7 +796,8 @@ const PlanConfiguration: React.FC = () => {
 
       {/* Benefit Management Section */}
       <BenefitManagement
-        classStructure={detailedClassStructure}
+        key={currentClassStructure?._id || 'empty'}
+        classStructure={currentClassStructure}
         limitStructure={formData?.limitStructure}
         costShares={classCostShares}
         activeNetworkTier={activeNetworkTier}
@@ -818,6 +826,7 @@ const PlanConfiguration: React.FC = () => {
             console.log('Updated limit structure:', updatedLimitStructure);
           }
         }}
+        onClassStructureChange={setCurrentClassStructure}
       />
     </Box>
   );
