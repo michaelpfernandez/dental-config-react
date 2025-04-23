@@ -56,9 +56,8 @@ import {
   DragIndicator as DragIcon,
   Add as AddIcon,
   Check as CheckIcon,
-  ArrowForward as ArrowForwardIcon,
-  ArrowDownward as ArrowDownwardIcon,
   MoreVert as MoreVertIcon,
+  ArrowDownward as ArrowDownwardIcon,
 } from '@mui/icons-material';
 
 // Define interfaces for our data structures
@@ -965,11 +964,18 @@ const SortableItem = ({
       <Box sx={{ width: '30px', mr: 1 }}>
         <IconButton
           size="small"
-          onClick={() => selectBenefitForMove(benefit, classId)}
+          onClick={() => {
+            if (!selectedBenefitForMove || selectedBenefitForMove.benefitId !== benefit.id) {
+              selectBenefitForMove(benefit, classId);
+            } else {
+              // Already selected, show menu to pick destination class
+              // This is handled at the class header level
+            }
+          }}
           aria-label="move benefit"
           color={selectedBenefitForMove?.benefitId === benefit.id ? 'primary' : 'default'}
         >
-          <ArrowForwardIcon fontSize="small" />
+          <MoreVertIcon fontSize="small" />
         </IconButton>
       </Box>
 
